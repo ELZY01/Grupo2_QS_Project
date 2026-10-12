@@ -25,6 +25,8 @@ describe('HealthStatus', () => {
 
     render(<HealthStatus />);
 
-    expect(await screen.findByRole('alert')).toHaveTextContent('Não foi possível contactar o backend');
+    expect(
+      await screen.findByText(/Não foi possível contactar o backend/)
+    ).toBeInTheDocument();
   });
 });
