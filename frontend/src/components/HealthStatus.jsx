@@ -1,32 +1,22 @@
-
 import { useCallback, useEffect, useState } from 'react';
 import { getHealth } from '../api/healthApi';
-import { getPersistencia } from '../api/persistenciaApi';
 import './HealthStatus.css';
 
 export default function HealthStatus() {
 
-  // Guarda o estado do backend.
+  // Guarda o estado da ligação ao backend Spring Boot.
   const [state, setState] = useState({
     loading: true,
     data: null,
     error: null
   });
 
-  // Guarda os registos consultados na base de dados.
-  const [registos, setRegistos] = useState([]);
-
-  // Guarda possíveis erros da consulta ao Supabase.
-  const [erroBD, setErroBD] = useState(null);
-
-  // Consulta o backend e a base de dados.
+  // Consulta o endpoint de saúde do backend.
   const checkHealth = useCallback(async () => {
     setState({ loading: true, data: null, error: null });
-    setRegistos([]);
-    setErroBD(null);
 
     try {
-      // Verifica se o Spring Boot está a funcionar.
+      // Verifica se o Spring Boot está disponível.
       const data = await getHealth();
 
       setState({
@@ -35,19 +25,12 @@ export default function HealthStatus() {
         error: null
       });
     } catch (error) {
+      // Guarda a mensagem de erro se o backend não responder.
       setState({
         loading: false,
         data: null,
         error: error.message
       });
-    }
-
-    try {
-      // O Spring Boot consulta os dados no Supabase.
-      const dadosBD = await getPersistencia();
-      setRegistos(dadosBD);
-    } catch (error) {
-      setErroBD(error.message);
     }
   }, []);
 
@@ -88,34 +71,6 @@ export default function HealthStatus() {
       <button type="button" onClick={checkHealth} disabled={loading}>
         Verificar novamente
       </button>
-
-      <hr />
-
-      <h3>Base de dados Supabase</h3>
-
-      {erroBD && (
-        <p className="health-error" role="alert">
-          Erro ao consultar a base de dados: {erroBD}
-        </p>
-      )}
-
-      {!erroBD && registos.length > 0 && (
-        <>
-          <p>Ligação à base de dados estabelecida.</p>
-
-          <ul>
-            {registos.map((registo) => (
-              <li key={registo.id}>
-                {registo.descricao}
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
-
-      {!erroBD && !loading && registos.length === 0 && (
-        <p>Sem registos para apresentar.</p>
-      )}
     </section>
   );
 }

@@ -54,6 +54,17 @@
 			<artifactId>postgresql</artifactId>
 			<scope>runtime</scope>
 		</dependency>
+
+		<!--
+    Base de dados H2 utilizada exclusivamente nos testes.
+    Funciona em memória, sem ligação à Internet ou ao Supabase.
+    A dependência só está disponível durante os testes.
+-->
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>

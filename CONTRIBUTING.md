@@ -8,8 +8,9 @@ O nosso fluxo segue estritamente o ciclo: **Issue ➔ Branch ➔ Commit ➔ Pull
 1.1. **Issues:** Todo o trabalho deve ser previamente associado a uma Issue no GitHub Projects.  
 1.2. **Branches:** É estritamente proibido fazer commits diretos no ramo `main`. O trabalho é isolado em ramos
 temporários criados a partir do `main` atualizado:
-- `feature/#<id>-descricao` (ex: `feature/#14-registar-inscricoes`)
-- `docs/#<id>-descricao` (ex: `docs/#2-#7-workflow`)  
+- `feat/<id>-descricao` — novas funcionalidades (ex: `feat/14-registar-inscricoes`).
+- `fix/<id>-descricao` — correções e dívida técnica (ex: `fix/s2-0-divida-tecnica`).
+- `docs/<id>-descricao` — alterações de documentação (ex: `docs/7-workflow`).
   1.3. **Commits:** O título/resumo do commit deve ser escrito em **Inglês** (ex: `docs: add workflow guidelines`).
 - A descrição detalhada no corpo do commit pode ser em **Inglês ou Português**.
 
