@@ -1,11 +1,11 @@
 # Modelo de Casos de Uso — StudyMatch
 
-> Sprint 1 · Issue #4 · Grupo 2
+> Sprint 1 · Issue #4 · Grupo 2 — atualizado no Sprint 2 (Issue #51: UC06/RN13 e novo UC16)
 > Documento vivo: os casos de uso vão evoluir nos próximos sprints.
 
 ## 1. Objetivo
 
-Este documento descreve o modelo inicial de casos de uso do StudyMatch. Cobre as seis áreas obrigatórias do enunciado e três casos de uso criativos propostos pela equipa. Cada caso de uso tem o objetivo, os atores, o cenário principal, os fluxos alternativos, as regras de negócio e os conceitos de domínio que revela. Esses conceitos alimentam o [modelo de domínio](modelo-dominio.md).
+Este documento descreve o modelo inicial de casos de uso do StudyMatch. Cobre as seis áreas obrigatórias do enunciado e quatro casos de uso criativos propostos pela equipa (o UC16 foi acrescentado no Sprint 2). Cada caso de uso tem o objetivo, os atores, o cenário principal, os fluxos alternativos, as regras de negócio e os conceitos de domínio que revela. Esses conceitos alimentam o [modelo de domínio](modelo-dominio.md).
 
 ## 2. Atores
 
@@ -39,6 +39,7 @@ flowchart LR
         UC13([UC13 Explicação da formação do grupo ★])
         UC14([UC14 Importar alunos e notas por CSV ★])
         UC15([UC15 Avaliação entre pares ★])
+        UC16([UC16 Explicação do perfil ★])
     end
 
     E --- UC01
@@ -49,6 +50,7 @@ flowchart LR
     E --- UC08
     E --- UC13
     E --- UC15
+    E --- UC16
     D --- UC02
     D --- UC05
     D --- UC10
@@ -63,6 +65,7 @@ flowchart LR
     UC06 -. include .-> UC09
     UC15 -. include .-> UC06
     UC11 -. extend .-> UC12
+    UC07 -. extend .-> UC16
 ```
 
 ★ = caso de uso criativo (proposto pela equipa)
@@ -77,7 +80,7 @@ flowchart LR
 | Perfil do estudante | UC07 | #18 |
 | Arranque a frio (*cold start*) | UC08, UC09 | #19, #20 |
 | Contexto de agrupamento | UC10, UC11, UC12 | #21, #22, #23 |
-| **Criativos** | UC13, UC14, UC15 | #24, #25, #26 |
+| **Criativos** | UC13, UC14, UC15, UC16 | #24, #25, #26, #39 |
 
 ---
 
@@ -217,8 +220,8 @@ flowchart LR
 **Cenário principal**
 1. O sistema obtém, para cada competência, as UCs associadas e respetivos pesos.
 2. Para cada UC em que o aluno foi aprovado, usa a melhor nota.
-3. Calcula a média ponderada das notas pelos pesos.
-4. Converte a média (0–20) para nível (1–5).
+3. Converte essa nota para nível (1–5) (RN13).
+4. Calcula a média dos níveis ponderada pelos pesos das UCs.
 5. Combina o resultado com o quiz (UC09) e, na competência *Trabalho em grupo*, com a avaliação entre pares (UC15).
 6. Atualiza o perfil do aluno.
 
@@ -226,7 +229,7 @@ flowchart LR
 - **2a.** O aluno não tem notas em nenhuma UC associada à competência → o nível vem só do quiz; se também não houver quiz, fica "sem dados".
 
 **Regras de negócio**
-- RN13: `nivelHistorico = 1 + 4 × (mediaPonderada / 20)`, arredondado a 1 casa decimal.
+- RN13: `nivel = 1 + 4 × (nota − 10) / 10` para notas aprovadas (10 → 1, 20 → 5); arredondamento só na apresentação. *Alterada no Sprint 2: ver [ADR-002](decisions/ADR-002-perfil-e-cold-start.md), D4.*
 - RN14: o recálculo é automático sempre que muda uma nota, um peso ou uma avaliação.
 
 **Conceitos de domínio:** Nível de competência, Origem do nível (quiz / histórico / pares), Perfil de competências.
@@ -464,6 +467,30 @@ flowchart LR
 
 ---
 
+### UC16 — Explicação do perfil de competências ★ · [#39]
+
+**Objetivo:** o estudante percebe de onde vem cada valor do seu perfil: que UCs, notas e pesos contribuíram, e quanto pesa ainda o quiz.
+**Ator primário:** Estudante · **Ator secundário:** Sistema
+**Justificação:** o perfil vai decidir os grupos. Um perfil que se explica é verificável pelo aluno e pelo docente, dá confiança no sistema e mostra o efeito imediato de cada nova nota.
+
+**Cenário principal**
+1. No perfil (UC07), o estudante escolhe uma competência.
+2. O sistema mostra a origem do nível (quiz, histórico, misto ou sem dados) e a percentagem do quiz e do histórico.
+3. O sistema lista as UCs que contribuíram: nota usada, nível correspondente, peso da UC e fração do nível histórico.
+4. O estudante fecha a explicação e volta ao perfil.
+
+**Fluxos alternativos / exceções**
+- **2a.** A competência não tem dados → o sistema indica o que falta (responder ao quiz ou registar notas nas UCs associadas).
+- **3a.** A competência vem só do quiz → não há lista de UCs; o sistema mostra o resultado do quiz e indica que o peso do quiz desce à medida que o aluno conclui UCs.
+
+**Regras de negócio**
+- RN32: as contribuições de uma competência somam 100% do nível histórico.
+- RN33: só aparecem UCs aprovadas; para cada UC aparece apenas a nota usada (a melhor).
+
+**Conceitos de domínio:** Contribuição, Nível de competência, Origem, Peso do quiz.
+
+---
+
 ## 7. Resumo das regras de negócio
 
 | ID | Regra | UC |
@@ -480,7 +507,7 @@ flowchart LR
 | RN10 | Escala de competências 1–5 | UC05 |
 | RN11 | Peso da associação em ]0, 1] | UC05 |
 | RN12 | 4 competências base = áreas do quiz | UC05, UC08 |
-| RN13 | `nivelHistorico = 1 + 4 × média/20` | UC06 |
+| RN13 | `nivel = 1 + 4 × (nota − 10)/10` (ADR-002) | UC06 |
 | RN14 | Recálculo automático | UC06 |
 | RN15 | Média do perfil = média dos níveis com dados | UC07, UC11 |
 | RN16 | Visibilidade do perfil | UC07 |
@@ -499,3 +526,5 @@ flowchart LR
 | RN29 | Avaliação entre pares anónima | UC15 |
 | RN30 | Uma avaliação por colega por grupo | UC15 |
 | RN31 | Pares = 50% de *Trabalho em grupo* | UC15 |
+| RN32 | Contribuições somam 100% do nível histórico | UC16 |
+| RN33 | Explicação mostra só a melhor nota aprovada por UC | UC16 |
