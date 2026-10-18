@@ -1,6 +1,6 @@
-
 package com.studymatch.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -19,9 +19,6 @@ import jakarta.persistence.UniqueConstraint;
  * - Pertence a um quiz.
  * - Avalia uma competência.
  * - Possui uma posição no questionário.
- *
- * O quiz inicial terá 20 perguntas, distribuídas
- * pelas quatro competências base.
  */
 @Entity
 @Table(
@@ -41,11 +38,13 @@ public class Question {
     private Long id;
 
     // Quiz ao qual a pergunta pertence.
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "quiz_id", nullable = false)
     private Quiz quiz;
 
     // Competência avaliada pela pergunta.
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "competency_id", nullable = false)
     private Competency competency;
