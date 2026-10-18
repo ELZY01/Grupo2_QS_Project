@@ -51,8 +51,15 @@ public class Answer {
     @JoinColumn(name = "question_id", nullable = false)
     private Question question;
 
-    // Valor da resposta, entre 1 e 5.
-    @Column(nullable = false)
+    /**
+     * Valor da resposta, entre 1 e 5.
+     *
+     * O nome da coluna SQL é "answer_value" porque
+     * "value" é uma palavra reservada no H2.
+     *
+     * O atributo Java continua a chamar-se "value".
+     */
+    @Column(name = "\"value\"", nullable = false)
     private Integer value;
 
     /**
