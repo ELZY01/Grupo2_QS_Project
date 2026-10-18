@@ -113,18 +113,27 @@ O ficheiro `.env` define `VITE_API_URL=http://localhost:8080`, o endereço do ba
 ### Testes
 
 ```bash
-cd backend && ./mvnw test     # backend   (Windows: mvnw.cmd test)
-cd frontend && npm test       # frontend  (Vitest)
+cd backend && ./mvnw clean test   # backend (Windows: mvnw.cmd clean test)
+cd frontend && npm test           # frontend (Vitest)
+```
+
+Os testes do backend **não precisam das credenciais da base de dados**: usam uma base H2 em memória (perfil `test`). O `clean test` compila o projeto e corre todos os testes unitários, incluindo as regras do perfil de competências (`ProfileCalculatorTest`).
+
+Para gerar o artefacto do backend (`backend/target/backend-*.jar`):
+
+```bash
+cd backend && ./mvnw clean package   # Windows: mvnw.cmd clean package
 ```
 
 ## Documentação
 
 | Documento | Descrição |
 |---|---|
-| [Casos de uso](docs/casos-de-uso.md) | 15 casos de uso: as 6 áreas do enunciado e 3 propostas da equipa |
+| [Casos de uso](docs/casos-de-uso.md) | 16 casos de uso: as 6 áreas do enunciado e 4 propostas da equipa |
 | [Modelo de domínio](docs/modelo-dominio.md) | Diagrama de classes UML do domínio |
 | [Arquitetura](docs/arquitetura.md) | Diagrama de arquitetura e responsabilidades dos componentes |
 | [ADR-001](docs/decisions/ADR-001-stack-tecnologica.md) | Decisão e justificação da stack |
+| [ADR-002](docs/decisions/ADR-002-perfil-e-cold-start.md) | Modelo do perfil de competências e estratégia de cold start |
 | [CONTRIBUTING](CONTRIBUTING.md) | Workflow, convenções de código e Definition of Done |
 
 ## Workflow da equipa
@@ -132,7 +141,7 @@ cd frontend && npm test       # frontend  (Vitest)
 Todo o trabalho segue o fluxo **Issue → Branch → Pull Request → Review → Merge**:
 
 - cada tarefa é uma Issue no Project board;
-- branches com o formato `feature/<id>-descricao` ou `docs/<id>-descricao`;
+- branches com o formato `feat/<id>-descricao` ou `docs/<id>-descricao`;
 - cada PR precisa da aprovação de outro membro, e ninguém aprova o seu próprio PR;
 - depois do merge, a branch é eliminada.
 
@@ -147,6 +156,8 @@ Os detalhes estão no [CONTRIBUTING.md](CONTRIBUTING.md).
 | Bruna Costa | [@Bruninha9](https://github.com/Bruninha9) |
 | Francisco Jacinto | [@FranciscoJacinto7077](https://github.com/FranciscoJacinto7077) |
 
-## Estado atual — Sprint 1
+## Estado atual — Sprint 2
 
-O Sprint 1 é a fundação do projeto: organização no GitHub, casos de uso, modelo de domínio, arquitetura e um esqueleto full-stack a funcionar (frontend → API → base de dados). As funcionalidades do produto (histórias de utilizador US01–US15) estão no Backlog para os próximos sprints.
+O Sprint 2 constrói o subsistema de **perfil do estudante**: gestão de estudantes, histórico académico, perfil de competências calculado a partir das notas, quiz de arranque a frio para alunos sem histórico e a **explicação do perfil** (funcionalidade da equipa). As regras e a sua justificação estão no [ADR-002](docs/decisions/ADR-002-perfil-e-cold-start.md). A formação automática de grupos fica para os próximos sprints.
+
+O Sprint 1 foi a fundação do projeto: organização no GitHub, casos de uso, modelo de domínio, arquitetura e um esqueleto full-stack a funcionar (frontend → API → base de dados).
