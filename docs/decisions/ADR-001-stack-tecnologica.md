@@ -13,7 +13,7 @@ O StudyMatch é uma aplicação full-stack (frontend, API, lógica de negócio e
 |Camada|Tecnologia|Ferramenta de build/dependências|
 |-|-|-|
 |Frontend|React|npm + Vite|
-|Backend / API|Java 17+ com Spring Boot (API REST)|Maven|
+|Backend / API|Java 21 LTS com Spring Boot (API REST)|Maven|
 |Persistência|PostgreSQL alojado no Supabase, acedido via Spring Data JPA|(gerido pelo Maven)|
 |Modelação|Visual Paradigm (UML: casos de uso, domínio, arquitetura)|—|
 |Gestão e versões|Git + GitHub (Issues, Projects, Pull Requests)|—|
