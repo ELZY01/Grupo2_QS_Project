@@ -44,8 +44,7 @@ public class Question {
     private Quiz quiz;
 
     // Competência avaliada pela pergunta.
-    @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "competency_id", nullable = false)
     private Competency competency;
 
