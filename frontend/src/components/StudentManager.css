@@ -1,0 +1,66 @@
+.student-manager {
+  margin-top: 32px;
+  text-align: left;
+}
+
+.student-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px 16px;
+  padding: 20px;
+  border: 1px solid #d0d7de;
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+
+.student-form h3 {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.student-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.student-form input {
+  padding: 8px;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  font: inherit;
+  font-weight: 400;
+}
+
+.student-form-actions,
+.student-form .student-error {
+  grid-column: 1 / -1;
+}
+
+.student-form-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.student-error {
+  color: #cf222e;
+  margin: 0;
+}
+
+.student-success {
+  color: #1a7f37;
+}
+
+.student-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.student-table th,
+.student-table td {
+  padding: 8px;
+  border-bottom: 1px solid #d0d7de;
+  text-align: left;
+}
