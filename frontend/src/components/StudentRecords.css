@@ -1,0 +1,200 @@
+.student-records {
+  margin-top: 32px;
+  text-align: left;
+}
+
+.student-picker {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 16px;
+}
+
+.student-picker select,
+.record-form select,
+.record-form input {
+  padding: 8px;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  font: inherit;
+  font-weight: 400;
+  background: #ffffff;
+}
+
+.records-grid {
+  display: grid;
+  gap: 24px;
+}
+
+.record-card {
+  border: 1px solid #d0d7de;
+  border-radius: 12px;
+  padding: 20px;
+  min-width: 0;
+}
+
+.record-card h3 {
+  margin-top: 0;
+}
+
+.record-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px 16px;
+  margin-bottom: 16px;
+}
+
+.record-form h4 {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.record-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.record-form-actions,
+.record-form .record-error {
+  grid-column: 1 / -1;
+}
+
+.record-error {
+  color: #cf222e;
+  margin: 0;
+}
+
+.record-success {
+  color: #1a7f37;
+}
+
+.record-empty,
+.profile-hint {
+  color: #59636e;
+}
+
+.record-table-wrap {
+  overflow-x: auto;
+}
+
+.record-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.record-table caption {
+  text-align: left;
+  font-weight: 600;
+  padding-bottom: 6px;
+}
+
+.record-table th,
+.record-table td {
+  padding: 8px;
+  border-bottom: 1px solid #d0d7de;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.status,
+.origin {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.status-aprovado { background: #dafbe1; color: #116329; }
+.status-reprovado { background: #ffebe9; color: #a40e26; }
+.status-em_curso { background: #ddf4ff; color: #0550ae; }
+
+.origin-quiz { background: #fff8c5; color: #7d4e00; }
+.origin-history { background: #dafbe1; color: #116329; }
+.origin-mixed { background: #ddf4ff; color: #0550ae; }
+.origin-no_data { background: #eaeef2; color: #59636e; }
+
+.profile-summary {
+  margin-top: 0;
+}
+
+.competency-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.competency details {
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
+}
+
+.competency summary {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) minmax(80px, 2fr) auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  cursor: pointer;
+}
+
+.competency-name {
+  font-weight: 600;
+}
+
+.competency-bar {
+  height: 10px;
+  border-radius: 999px;
+  background: #eaeef2;
+  overflow: hidden;
+}
+
+.competency-bar span {
+  display: block;
+  height: 100%;
+  background: #0969da;
+}
+
+.competency-level {
+  font-variant-numeric: tabular-nums;
+  min-width: 4.5em;
+  text-align: right;
+}
+
+.competency-detail {
+  padding: 0 12px 12px;
+}
+
+.competency-facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 12px;
+}
+
+.competency-facts dt {
+  font-weight: 600;
+}
+
+.competency-facts dd {
+  margin: 0;
+}
+
+@media (max-width: 560px) {
+  .competency summary {
+    grid-template-columns: 1fr auto;
+  }
+
+  .competency-bar {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}

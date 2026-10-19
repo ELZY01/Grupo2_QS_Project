@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import HealthStatus from './components/HealthStatus';
 import { QuizOnboarding } from './components/QuizOnboarding';
 import StudentManager from './components/StudentManager';
+import StudentRecords from './components/StudentRecords';
 
 export default function App() {
   const [view, setView] = useState('quiz'); // 'quiz' ou 'profile'
@@ -32,6 +33,8 @@ export default function App() {
       )}
 
       <StudentManager />
+
+      <StudentRecords />
 
       <footer style={{ marginTop: '40px', borderTop: '1px solid #eee', paddingTop: '20px' }}>
         <HealthStatus />
