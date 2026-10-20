@@ -1,0 +1,23 @@
+.mascot {
+  position: relative;
+  display: block;
+  flex: none;
+}
+
+.mascot img {
+  position: absolute;
+  inset: 0;
+  image-rendering: pixelated;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .mascot-animated {
+    animation: mascot-idle 2.4s steps(2) infinite;
+  }
+}
+
+@keyframes mascot-idle {
+  50% {
+    transform: translateY(-3px);
+  }
+}

@@ -1,0 +1,173 @@
+/* Layout: barra lateral fixa (marca, navegação, mascote, estado) + área de conteúdo. */
+.app-shell {
+  display: grid;
+  grid-template-columns: 270px minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.app-sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px 18px;
+  background: var(--surface);
+  border-right: 1px solid var(--line);
+}
+
+.app-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.app-logo {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  background: var(--primary);
+  color: var(--primary-ink);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.app-name {
+  margin: 0;
+  font-weight: 800;
+  font-size: 1.1rem;
+}
+
+.app-tagline {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.app-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.app-nav button {
+  text-align: left;
+  border-color: transparent;
+  background: transparent;
+  color: var(--muted);
+}
+
+.app-nav button:hover:not(:disabled) {
+  background: var(--surface-2);
+  border-color: transparent;
+  color: var(--ink);
+}
+
+.app-nav button.active,
+.app-nav button.active:hover:not(:disabled) {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.app-status {
+  margin-top: auto;
+}
+
+.app-main {
+  padding: 32px clamp(16px, 4vw, 48px) 56px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+
+.page-header h1 {
+  font-size: 1.75rem;
+  font-weight: 800;
+}
+
+.page-header p {
+  margin: 6px 0 0;
+  color: var(--muted);
+}
+
+/* O título já está no cabeçalho da página. */
+.app-main .student-manager > h2,
+.app-main .student-records > h2 {
+  display: none;
+}
+
+.quiz-done h2 {
+  margin-bottom: 8px;
+}
+
+.quiz-done p {
+  color: var(--muted);
+  margin: 0 0 16px;
+}
+
+/* Mascote como guia (tutorial) */
+.mascot-guide {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.mascot-bubble {
+  position: relative;
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  font-size: 0.85rem;
+}
+
+.mascot-bubble::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -7px;
+  width: 12px;
+  height: 12px;
+  background: var(--surface-2);
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  transform: translateX(-50%) rotate(45deg);
+}
+
+@media (max-width: 860px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .app-sidebar {
+    position: static;
+    height: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+    gap: 16px;
+  }
+
+  .app-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .mascot-guide {
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+  }
+
+  .mascot-bubble::after {
+    display: none;
+  }
+
+  .app-status {
+    margin-top: 0;
+  }
+}

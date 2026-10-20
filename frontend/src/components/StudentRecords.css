@@ -1,62 +1,59 @@
 .student-records {
-  margin-top: 32px;
-  text-align: left;
+  display: grid;
+  gap: 18px;
 }
 
 .student-picker {
-  display: inline-flex;
-  flex-direction: column;
-  gap: 4px;
+  display: grid;
+  gap: 6px;
+  max-width: 360px;
   font-weight: 600;
-  font-size: 0.9rem;
-  margin-bottom: 16px;
-}
-
-.student-picker select,
-.record-form select,
-.record-form input {
-  padding: 8px;
-  border: 1px solid #d0d7de;
-  border-radius: 6px;
-  font: inherit;
-  font-weight: 400;
-  background: #ffffff;
+  font-size: 0.85rem;
 }
 
 .records-grid {
   display: grid;
-  gap: 24px;
+  gap: 20px;
+  align-items: start;
 }
 
+
 .record-card {
-  border: 1px solid #d0d7de;
-  border-radius: 12px;
-  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 22px;
   min-width: 0;
+  display: grid;
+  gap: 16px;
 }
 
 .record-card h3 {
-  margin-top: 0;
+  font-size: 1.1rem;
 }
 
 .record-form {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 12px 16px;
-  margin-bottom: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px 14px;
+  padding: 16px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
 }
 
 .record-form h4 {
   grid-column: 1 / -1;
-  margin: 0;
+  font-size: 0.95rem;
 }
 
 .record-form label {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.82rem;
 }
 
 .record-form-actions,
@@ -65,41 +62,69 @@
 }
 
 .record-error {
-  color: #cf222e;
   margin: 0;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-size: 0.9rem;
 }
 
 .record-success {
-  color: #1a7f37;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--primary-soft);
+  color: var(--success);
+  font-size: 0.9rem;
 }
 
 .record-empty,
 .profile-hint {
-  color: #59636e;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
 }
 
 .record-table-wrap {
   overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
 }
 
 .record-table {
   width: 100%;
   border-collapse: collapse;
   font-variant-numeric: tabular-nums;
+  font-size: 0.9rem;
 }
 
 .record-table caption {
   text-align: left;
-  font-weight: 600;
-  padding-bottom: 6px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 10px 12px 6px;
+}
+
+.record-table th {
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .record-table th,
 .record-table td {
-  padding: 8px;
-  border-bottom: 1px solid #d0d7de;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
   text-align: left;
   white-space: nowrap;
+}
+
+.record-table tr:last-child td {
+  border-bottom: 0;
 }
 
 .status,
@@ -107,81 +132,132 @@
   display: inline-block;
   padding: 2px 10px;
   border-radius: 999px;
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-size: 0.76rem;
+  font-weight: 700;
 }
 
-.status-aprovado { background: #dafbe1; color: #116329; }
-.status-reprovado { background: #ffebe9; color: #a40e26; }
-.status-em_curso { background: #ddf4ff; color: #0550ae; }
+.status-aprovado { background: #dff3e6; color: #1f7a49; }
+.status-reprovado { background: #fdecec; color: #b42f2f; }
+.status-em_curso { background: #e3edfb; color: #2f5e9e; }
 
-.origin-quiz { background: #fff8c5; color: #7d4e00; }
-.origin-history { background: #dafbe1; color: #116329; }
-.origin-mixed { background: #ddf4ff; color: #0550ae; }
-.origin-no_data { background: #eaeef2; color: #59636e; }
+.origin-quiz { background: #fff3cf; color: #8a5a00; }
+.origin-history { background: #dff3e6; color: #1f7a49; }
+.origin-mixed { background: #e3edfb; color: #2f5e9e; }
+.origin-no_data { background: #edf0ed; color: #5f6d65; }
+
+/* Mascote do perfil */
+.profile-mascot {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 14px 18px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(180deg, var(--primary-soft), var(--surface));
+  border: 1px solid var(--line);
+}
+
+.profile-mascot-title {
+  margin: 0;
+  font-weight: 800;
+  font-size: 1.05rem;
+}
+
+.profile-mascot-hint {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
 
 .profile-summary {
-  margin-top: 0;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.profile-summary strong {
+  color: var(--ink);
 }
 
 .competency-list {
   list-style: none;
   padding: 0;
   margin: 0;
-  display: flex;
-  flex-direction: column;
+  display: grid;
   gap: 8px;
 }
 
 .competency details {
-  border: 1px solid #d0d7de;
-  border-radius: 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+
+.competency details[open] {
+  background: var(--surface-2);
 }
 
 .competency summary {
   display: grid;
-  grid-template-columns: minmax(120px, 1fr) minmax(80px, 2fr) auto auto;
+  grid-template-columns: minmax(110px, 1fr) minmax(70px, 1.4fr) auto auto;
   align-items: center;
   gap: 12px;
-  padding: 10px 12px;
+  padding: 12px 14px;
   cursor: pointer;
+  list-style: none;
+}
+
+.competency summary::-webkit-details-marker {
+  display: none;
 }
 
 .competency-name {
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 0.92rem;
 }
 
 .competency-bar {
-  height: 10px;
+  height: 8px;
   border-radius: 999px;
-  background: #eaeef2;
+  background: #e7ece7;
   overflow: hidden;
 }
 
 .competency-bar span {
   display: block;
   height: 100%;
-  background: #0969da;
+  border-radius: 999px;
+  background: var(--primary);
 }
 
 .competency-level {
   font-variant-numeric: tabular-nums;
-  min-width: 4.5em;
+  font-weight: 700;
+  min-width: 4.2em;
   text-align: right;
+  font-size: 0.9rem;
 }
 
 .competency-detail {
-  padding: 0 12px 12px;
+  padding: 0 14px 14px;
+  display: grid;
+  gap: 10px;
+  font-size: 0.9rem;
+}
+
+.competency-detail > p {
+  margin: 0;
+  color: var(--muted);
 }
 
 .competency-facts {
   display: grid;
   grid-template-columns: auto 1fr;
   gap: 4px 12px;
+  margin: 0;
 }
 
 .competency-facts dt {
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .competency-facts dd {
@@ -196,5 +272,10 @@
   .competency-bar {
     grid-column: 1 / -1;
     grid-row: 2;
+  }
+
+  .profile-mascot {
+    flex-direction: column;
+    text-align: center;
   }
 }

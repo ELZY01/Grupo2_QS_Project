@@ -1,30 +1,115 @@
+/* Tokens de design do StudyMatch: usar sempre estas variáveis nos componentes. */
 :root {
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --bg: #f3f5f2;
+  --surface: #ffffff;
+  --surface-2: #f7f9f6;
+  --ink: #1d2a23;
+  --muted: #5f6d65;
+  --line: #dde3dd;
+  --primary: #2f8a5b;
+  --primary-ink: #ffffff;
+  --primary-soft: #e3f3ea;
+  --danger: #c23a3a;
+  --danger-soft: #fdecec;
+  --success: #1f7a49;
+  --radius: 14px;
+  --radius-sm: 9px;
+  --shadow: 0 1px 2px rgba(29, 42, 35, 0.06), 0 6px 20px rgba(29, 42, 35, 0.05);
+  --font: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  font-family: var(--font);
   line-height: 1.5;
-  color: #1f2328;
-  background-color: #ffffff;
+  color: var(--ink);
+  background-color: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
   margin: 0;
+  background: var(--bg);
 }
 
-.app {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 32px 16px;
-  text-align: center;
+h1,
+h2,
+h3,
+h4 {
+  line-height: 1.2;
+  margin: 0;
 }
 
 button {
-  padding: 8px 16px;
-  border: 1px solid #d0d7de;
-  border-radius: 8px;
-  background: #f6f8fa;
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.92rem;
+  padding: 9px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--ink);
   cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+button:hover:not(:disabled) {
+  border-color: var(--primary);
 }
 
 button:disabled {
   cursor: default;
-  opacity: 0.6;
+  opacity: 0.55;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+summary:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--primary) 45%, transparent);
+  outline-offset: 2px;
+}
+
+.btn-primary,
+button[type='submit'] {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-ink);
+}
+
+.btn-primary:hover:not(:disabled),
+button[type='submit']:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--primary) 88%, black);
+}
+
+input,
+select {
+  font: inherit;
+  font-size: 0.95rem;
+  padding: 9px 11px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--ink);
+  width: 100%;
+}
+
+input:disabled {
+  background: var(--surface-2);
+  color: var(--muted);
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 22px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
