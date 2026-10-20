@@ -13,8 +13,10 @@ export default function AdminPix({ tab }) {
   return (
     <aside className="mascot-guide admin-pix" aria-label="Dica da mascote">
       <p className="mascot-bubble">{TIPS[tab]}</p>
-      <Mascot src={ADMIN_SPRITE} alt="Pix Admin, versão ultra rara" size={96} />
-      <p className="admin-badge">★ Ultra raro · Pix Admin</p>
+      <div className="admin-pix-art">
+        <Mascot src={ADMIN_SPRITE} alt="Pix Admin, versão ultra rara" size={96} />
+        <p className="admin-badge">★ Ultra raro · Pix Admin</p>
+      </div>
     </aside>
   );
 }

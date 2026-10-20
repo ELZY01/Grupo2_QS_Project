@@ -47,16 +47,18 @@ export default function AdminApp({ onLogout }) {
 
         <div className="app-status">
           <HealthStatus />
-          <button type="button" className="app-logout" onClick={onLogout}>
-            Terminar sessão
-          </button>
         </div>
       </aside>
 
       <main className="app-main">
-        <header className="page-header">
-          <h1>{current.label}</h1>
-          <p>{current.hint}</p>
+        <header className="page-header admin-header">
+          <div>
+            <h1>{current.label}</h1>
+            <p>{current.hint}</p>
+          </div>
+          <button type="button" className="admin-logout" onClick={onLogout}>
+            Sair
+          </button>
         </header>
 
         {tab === 'students' && <StudentManager />}

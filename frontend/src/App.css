@@ -173,7 +173,15 @@
 }
 
 
+.admin-pix-art {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  flex: none;
+}
+
 .admin-badge {
+  white-space: nowrap;
   margin: 0;
   padding: 4px 10px;
   border-radius: 999px;
@@ -184,7 +192,13 @@
   letter-spacing: 0.02em;
 }
 
-.app-logout {
-  width: 100%;
-  margin-top: 10px;
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.admin-logout {
+  flex: none;
 }
