@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { getProfile } from '../api/profileApi';
-import Mascot from '../mascot/Mascot';
-import { pickMascot } from '../mascot/mascot';
+import Mascot from '../mascot/Mascot.jsx';
+import { pickMascot } from '../mascot/mascot.js';
 
 const ORIGIN = {
   QUIZ: { label: 'Quiz', text: 'Vem só do quiz inicial: ainda não há notas nas UCs desta competência.' },

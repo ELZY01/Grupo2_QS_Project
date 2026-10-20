@@ -65,3 +65,20 @@ export function pickMascot(competencies = []) {
     levels,
   };
 }
+
+// Ovo do quiz inicial: racha à medida que o estudante responde (#35).
+export const EGG_STAGES = [0, 1, 2, 3, 4].map((n) => sprite(`egg-${n}`));
+export const SHELL_SPRITE = sprite('shell');
+
+/**
+ * Fase do ovo (0 = inteiro, 4 = quase a abrir) a partir das respostas dadas.
+ * @param {number} answered perguntas respondidas
+ * @param {number} total total de perguntas
+ */
+export function eggStage(answered, total) {
+  if (!total || answered <= 0) return 0;
+  return Math.min(4, Math.floor((answered / total) * 5));
+}
+
+// Pix do administrador: versão ultra rara (roxo real, coroa e brilhos dourados). Não passa pelo quiz.
+export const ADMIN_SPRITE = sprite('admin');

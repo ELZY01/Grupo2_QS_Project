@@ -14,8 +14,9 @@ const STATUS_LABEL = {
  *
  * @param {number} studentId estudante selecionado
  * @param {Function} onChange chamado depois de registar uma inscrição (ex.: para recalcular o perfil)
+ * @param {boolean} readOnly só mostra o histórico (o estudante vê; quem regista as UCs é o administrador)
  */
-export default function AcademicHistory({ studentId, onChange }) {
+export default function AcademicHistory({ studentId, onChange, readOnly = false }) {
   const [courseUnits, setCourseUnits] = useState([]);
   const [enrollments, setEnrollments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -96,12 +97,14 @@ export default function AcademicHistory({ studentId, onChange }) {
 
       {!loading && !loadError && (
         <>
-          <EnrollmentForm
-            courseUnits={courseUnits}
-            onSubmit={handleSubmit}
-            error={formError}
-            saving={saving}
-          />
+          {!readOnly && (
+            <EnrollmentForm
+              courseUnits={courseUnits}
+              onSubmit={handleSubmit}
+              error={formError}
+              saving={saving}
+            />
+          )}
 
           {success && (
             <p className="record-success" role="status">
@@ -110,7 +113,11 @@ export default function AcademicHistory({ studentId, onChange }) {
           )}
 
           {rows.length === 0 ? (
-            <p className="record-empty">Ainda não há inscrições registadas para este estudante.</p>
+            <p className="record-empty">
+              {readOnly
+                ? 'Ainda não tens cadeiras registadas. Quando o administrador as lançar, aparecem aqui.'
+                : 'Ainda não há inscrições registadas para este estudante.'}
+            </p>
           ) : (
             <div className="record-table-wrap">
               <table className="record-table">

@@ -1,5 +1,5 @@
 import './Mascot.css';
-import { MASCOT_HEIGHT, MASCOT_WIDTH } from './mascot';
+import { MASCOT_HEIGHT, MASCOT_WIDTH } from './mascot.js';
 
 /**
  * Desenha a mascote em pixel art, empilhando as camadas (corpo + acessórios).

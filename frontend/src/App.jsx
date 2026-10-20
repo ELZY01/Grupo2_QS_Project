@@ -1,83 +1,60 @@
 import { useState } from 'react';
-import HealthStatus from './components/HealthStatus';
-import { QuizOnboarding } from './components/QuizOnboarding';
-import StudentManager from './components/StudentManager';
-import StudentRecords from './components/StudentRecords';
-import MascotGuide from './mascot/MascotGuide';
-import './App.css';
+import AdminApp from './AdminApp.jsx';
+import { readSession, saveSession } from './auth/session.js';
+import Login from './student/Login.jsx';
+import Register from './student/Register.jsx';
+import StudentApp from './student/StudentApp.jsx';
+import Welcome from './student/Welcome.jsx';
+import './student/student.css';
 
-// Cada separador mostra uma área da aplicação, em vez de estar tudo na mesma página.
-const TABS = [
-  { id: 'students', label: 'Estudantes', hint: 'Registar e editar estudantes' },
-  { id: 'records', label: 'Percurso e perfil', hint: 'Notas, competências e mascote' },
-  { id: 'quiz', label: 'Quiz inicial', hint: 'Perfil para quem ainda não tem notas' },
-];
-
+/**
+ * Ponto de entrada:
+ * - sem sessão: boas-vindas, entrar ou criar conta;
+ * - administrador: área de gestão (estudantes e cadeiras), com o Pix real;
+ * - estudante: quiz obrigatório até o Pix nascer e depois a área do estudante.
+ */
 export default function App() {
-  const [tab, setTab] = useState('students');
-  const [quizDone, setQuizDone] = useState(false);
-  const current = TABS.find((t) => t.id === tab);
+  const [session, setSession] = useState(readSession);
+  const [screen, setScreen] = useState('welcome');
+  const [justRegistered, setJustRegistered] = useState(false);
+
+  const login = (next, isNew = false) => {
+    saveSession(next);
+    setJustRegistered(isNew);
+    setSession(next);
+  };
+
+  const logout = () => {
+    saveSession(null);
+    setSession(null);
+    setScreen('welcome');
+  };
+
+  if (session?.role === 'admin') return <AdminApp onLogout={logout} />;
+
+  if (session?.role === 'student') {
+    return <StudentApp studentId={session.id} startWithQuiz={justRegistered} onLogout={logout} />;
+  }
 
   return (
-    <div className="app-shell">
-      <aside className="app-sidebar">
-        <div className="app-brand">
-          <span className="app-logo" aria-hidden="true">SM</span>
-          <div>
-            <p className="app-name">StudyMatch</p>
-            <p className="app-tagline">Grupos equilibrados por competências</p>
-          </div>
-        </div>
-
-        <nav className="app-nav" aria-label="Secções">
-          {TABS.map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              className={tab === t.id ? 'active' : ''}
-              aria-current={tab === t.id ? 'page' : undefined}
-              onClick={() => setTab(t.id)}
-            >
-              {t.label}
-            </button>
-          ))}
-        </nav>
-
-        <MascotGuide tab={tab} />
-
-        <div className="app-status">
-          <HealthStatus />
-        </div>
-      </aside>
-
-      <main className="app-main">
-        <header className="page-header">
-          <h1>{current.label}</h1>
-          <p>{current.hint}</p>
-        </header>
-
-        {tab === 'students' && <StudentManager />}
-
-        {tab === 'records' && <StudentRecords />}
-
-        {tab === 'quiz' &&
-          (quizDone ? (
-            <section className="card quiz-done">
-              <h2>Quiz submetido</h2>
-              <p>As competências foram registadas. Vê o resultado em &quot;Percurso e perfil&quot;.</p>
-              <div className="actions">
-                <button type="button" className="btn-primary" onClick={() => setTab('records')}>
-                  Ver perfil
-                </button>
-                <button type="button" onClick={() => setQuizDone(false)}>
-                  Refazer quiz
-                </button>
-              </div>
-            </section>
-          ) : (
-            <QuizOnboarding studentId={1} onComplete={() => setQuizDone(true)} />
-          ))}
-      </main>
+    <div className="sx">
+      {screen === 'welcome' && (
+        <Welcome onStart={() => setScreen('register')} onLogin={() => setScreen('login')} />
+      )}
+      {screen === 'register' && (
+        <Register
+          onBack={() => setScreen('welcome')}
+          onCreated={(s) => login({ role: 'student', id: s.id }, true)}
+        />
+      )}
+      {screen === 'login' && (
+        <Login
+          onBack={() => setScreen('welcome')}
+          onRegister={() => setScreen('register')}
+          onStudent={(s) => login({ role: 'student', id: s.id })}
+          onAdmin={() => login({ role: 'admin' })}
+        />
+      )}
     </div>
   );
 }
