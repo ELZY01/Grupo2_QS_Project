@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { getProfile } from '../api/profileApi';
-import Mascot from '../mascot/Mascot';
+import Mascot from '../mascot/Mascot.jsx';
 import { pickMascot } from '../mascot/mascot';
 
 const ORIGIN = {

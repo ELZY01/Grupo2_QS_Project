@@ -3,7 +3,7 @@ import HealthStatus from './components/HealthStatus';
 import { QuizOnboarding } from './components/QuizOnboarding';
 import StudentManager from './components/StudentManager';
 import StudentRecords from './components/StudentRecords';
-import MascotGuide from './mascot/MascotGuide';
+import MascotGuide from './mascot/MascotGuide.jsx';
 import './App.css';
 
 // Cada separador mostra uma área da aplicação, em vez de estar tudo na mesma página.
@@ -16,6 +16,7 @@ const TABS = [
 export default function App() {
   const [tab, setTab] = useState('students');
   const [quizDone, setQuizDone] = useState(false);
+  const [selectedStudentId, setSelectedStudentId] = useState(null);
   const current = TABS.find((t) => t.id === tab);
 
   return (
@@ -58,7 +59,12 @@ export default function App() {
 
         {tab === 'students' && <StudentManager />}
 
-        {tab === 'records' && <StudentRecords />}
+        {tab === 'records' && (
+          <StudentRecords
+            selectedStudentId={selectedStudentId}
+            onSelectStudent={setSelectedStudentId}
+          />
+        )}
 
         {tab === 'quiz' &&
           (quizDone ? (
@@ -75,7 +81,11 @@ export default function App() {
               </div>
             </section>
           ) : (
-            <QuizOnboarding studentId={1} onComplete={() => setQuizDone(true)} />
+            <QuizOnboarding
+              studentId={selectedStudentId}
+              onSelectStudent={setSelectedStudentId}
+              onComplete={() => setQuizDone(true)}
+            />
           ))}
       </main>
     </div>

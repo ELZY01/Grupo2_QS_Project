@@ -1,4 +1,4 @@
-import Mascot from './Mascot';
+import Mascot from './Mascot.jsx';
 import { BASE_SPRITE } from './mascot';
 
 // Dicas da mascote para quem está a começar (tutorial).
