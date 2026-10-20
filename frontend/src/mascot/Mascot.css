@@ -1,6 +1,13 @@
 .mascot {
-  image-rendering: pixelated;
+  position: relative;
   display: block;
+  flex: none;
+}
+
+.mascot img {
+  position: absolute;
+  inset: 0;
+  image-rendering: pixelated;
 }
 
 @media (prefers-reduced-motion: no-preference) {

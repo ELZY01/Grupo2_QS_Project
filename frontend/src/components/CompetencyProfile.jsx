@@ -87,13 +87,13 @@ function ProfileMascot({ competencies, name }) {
     : 'Pix ainda é bebé';
   const hint = mascot.area
     ? mascot.tie
-      ? 'Tens mais do que uma área no topo. A mascote mostra a primeira.'
-      : `A tua área mais forte é ${mascot.area.label}.`
+      ? 'Tens mais do que uma área no topo: a cor vem da primeira e os acessórios mostram todas.'
+      : `A cor vem da tua área mais forte (${mascot.area.label}); os acessórios mostram as outras.`
     : 'Faz o quiz ou regista notas para o Pix evoluir.';
 
   return (
     <div className="profile-mascot">
-      <Mascot src={mascot.src} alt={`Mascote de ${name}: ${text}`} size={110} />
+      <Mascot layers={mascot.layers} alt={`Mascote de ${name}: ${text}`} size={110} />
       <div>
         <p className="profile-mascot-title">{text}</p>
         <p className="profile-mascot-hint">{hint}</p>

@@ -1,16 +1,24 @@
 import './Mascot.css';
+import { MASCOT_HEIGHT, MASCOT_WIDTH } from './mascot';
 
 /**
- * Desenha a mascote em pixel art, sem suavizar os píxeis.
+ * Desenha a mascote em pixel art, empilhando as camadas (corpo + acessórios).
  */
-export default function Mascot({ src, alt, size = 120, animated = true }) {
+export default function Mascot({ layers, src, alt, size = 120, animated = true }) {
+  const stack = layers && layers.length > 0 ? layers : [src];
+  const width = size;
+  const height = Math.round((size * MASCOT_HEIGHT) / MASCOT_WIDTH);
+
   return (
-    <img
+    <div
       className={`mascot${animated ? ' mascot-animated' : ''}`}
-      src={src}
-      alt={alt}
-      width={size}
-      height={Math.round((size * 60) / 53)}
-    />
+      role="img"
+      aria-label={alt}
+      style={{ width, height }}
+    >
+      {stack.map((layer, index) => (
+        <img key={`${index}-${layer}`} src={layer} alt="" width={width} height={height} />
+      ))}
+    </div>
   );
 }
