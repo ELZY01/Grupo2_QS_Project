@@ -1,44 +1,83 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import HealthStatus from './components/HealthStatus';
 import { QuizOnboarding } from './components/QuizOnboarding';
 import StudentManager from './components/StudentManager';
 import StudentRecords from './components/StudentRecords';
+import MascotGuide from './mascot/MascotGuide';
+import './App.css';
+
+// Cada separador mostra uma área da aplicação, em vez de estar tudo na mesma página.
+const TABS = [
+  { id: 'students', label: 'Estudantes', hint: 'Registar e editar estudantes' },
+  { id: 'records', label: 'Percurso e perfil', hint: 'Notas, competências e mascote' },
+  { id: 'quiz', label: 'Quiz inicial', hint: 'Perfil para quem ainda não tem notas' },
+];
 
 export default function App() {
-  const [view, setView] = useState('quiz'); // 'quiz' ou 'profile'
+  const [tab, setTab] = useState('students');
+  const [quizDone, setQuizDone] = useState(false);
+  const current = TABS.find((t) => t.id === tab);
 
   return (
-    <main className="app">
-      <header>
-        <h1>StudyMatch</h1>
-        <p>Formação de grupos equilibrados a partir de competências.</p>
-      </header>
-
-      {view === 'quiz' ? (
-        <QuizOnboarding
-          studentId={1}
-          onComplete={() => setView('profile')}
-        />
-      ) : (
-        <div style={{ textAlign: 'center', padding: '40px 20px' }}>
-          <h2>Perfil do Estudante</h2>
-          <p>As tuas competências foram registadas e calculadas com sucesso!</p>
-          <button
-            onClick={() => setView('quiz')}
-            style={{ padding: '10px 20px', marginTop: '15px', cursor: 'pointer' }}
-          >
-            Refazer Quiz
-          </button>
+    <div className="app-shell">
+      <aside className="app-sidebar">
+        <div className="app-brand">
+          <span className="app-logo" aria-hidden="true">SM</span>
+          <div>
+            <p className="app-name">StudyMatch</p>
+            <p className="app-tagline">Grupos equilibrados por competências</p>
+          </div>
         </div>
-      )}
 
-      <StudentManager />
+        <nav className="app-nav" aria-label="Secções">
+          {TABS.map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              className={tab === t.id ? 'active' : ''}
+              aria-current={tab === t.id ? 'page' : undefined}
+              onClick={() => setTab(t.id)}
+            >
+              {t.label}
+            </button>
+          ))}
+        </nav>
 
-      <StudentRecords />
+        <MascotGuide tab={tab} />
 
-      <footer style={{ marginTop: '40px', borderTop: '1px solid #eee', paddingTop: '20px' }}>
-        <HealthStatus />
-      </footer>
-    </main>
+        <div className="app-status">
+          <HealthStatus />
+        </div>
+      </aside>
+
+      <main className="app-main">
+        <header className="page-header">
+          <h1>{current.label}</h1>
+          <p>{current.hint}</p>
+        </header>
+
+        {tab === 'students' && <StudentManager />}
+
+        {tab === 'records' && <StudentRecords />}
+
+        {tab === 'quiz' &&
+          (quizDone ? (
+            <section className="card quiz-done">
+              <h2>Quiz submetido</h2>
+              <p>As competências foram registadas. Vê o resultado em &quot;Percurso e perfil&quot;.</p>
+              <div className="actions">
+                <button type="button" className="btn-primary" onClick={() => setTab('records')}>
+                  Ver perfil
+                </button>
+                <button type="button" onClick={() => setQuizDone(false)}>
+                  Refazer quiz
+                </button>
+              </div>
+            </section>
+          ) : (
+            <QuizOnboarding studentId={1} onComplete={() => setQuizDone(true)} />
+          ))}
+      </main>
+    </div>
   );
 }

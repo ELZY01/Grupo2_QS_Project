@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { getProfile } from '../api/profileApi';
+import Mascot from '../mascot/Mascot';
+import { pickMascot } from '../mascot/mascot';
 
 const ORIGIN = {
   QUIZ: { label: 'Quiz', text: 'Vem só do quiz inicial: ainda não há notas nas UCs desta competência.' },
@@ -54,6 +56,8 @@ export default function CompetencyProfile({ studentId, refreshKey = 0 }) {
 
       {profile && !error && (
         <>
+          <ProfileMascot competencies={profile.competencies} name={profile.studentName} />
+
           <p className="profile-summary">
             {profile.completedCourseUnits} UC(s) concluída(s) · o quiz conta{' '}
             <strong>{percent(profile.quizWeight)}</strong> no perfil
@@ -73,6 +77,28 @@ export default function CompetencyProfile({ studentId, refreshKey = 0 }) {
         </>
       )}
     </section>
+  );
+}
+
+function ProfileMascot({ competencies, name }) {
+  const mascot = pickMascot(competencies);
+  const text = mascot.area
+    ? `Pix ${mascot.area.title} · nível ${mascot.level}`
+    : 'Pix ainda é bebé';
+  const hint = mascot.area
+    ? mascot.tie
+      ? 'Tens mais do que uma área no topo. A mascote mostra a primeira.'
+      : `A tua área mais forte é ${mascot.area.label}.`
+    : 'Faz o quiz ou regista notas para o Pix evoluir.';
+
+  return (
+    <div className="profile-mascot">
+      <Mascot src={mascot.src} alt={`Mascote de ${name}: ${text}`} size={110} />
+      <div>
+        <p className="profile-mascot-title">{text}</p>
+        <p className="profile-mascot-hint">{hint}</p>
+      </div>
+    </div>
   );
 }
 
