@@ -171,3 +171,34 @@
     margin-top: 0;
   }
 }
+
+
+.admin-pix-art {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  flex: none;
+}
+
+.admin-badge {
+  white-space: nowrap;
+  margin: 0;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #7b4bd1, #c48a1c);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.admin-logout {
+  flex: none;
+}

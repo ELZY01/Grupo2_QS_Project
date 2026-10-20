@@ -279,3 +279,27 @@
     text-align: center;
   }
 }
+
+/* Bloqueio enquanto o quiz inicial não estiver feito */
+.egg-gate {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.egg-gate h3 {
+  margin: 0 0 6px;
+}
+
+.egg-gate p {
+  margin: 0 0 14px;
+  color: var(--muted);
+  max-width: 520px;
+}
+
+@media (max-width: 600px) {
+  .egg-gate {
+    flex-direction: column;
+    text-align: center;
+  }
+}

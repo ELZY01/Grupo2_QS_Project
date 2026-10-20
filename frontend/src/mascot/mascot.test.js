@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BASE_SPRITE, pickMascot } from './mascot';
+import { BASE_SPRITE, EGG_STAGES, eggStage, pickMascot } from './mascot.js';
 
 const c = (code, level) => ({ code, level });
 
@@ -18,7 +18,7 @@ describe('pickMascot', () => {
     expect(m.level).toBe(4);
     expect(m.tie).toBe(false);
     expect(m.layers[0]).toContain('body-tempo');
-    expect(m.layers.slice(1).join(' ')).toMatch(/org-2.*prog-3.*tempo-4/);
+    expect(m.layers.slice(1).join(' ')).toMatch(/tempo-4.*prog-3.*org-2/);
     expect(m.layers.join(' ')).not.toContain('equipa');
   });
 
@@ -37,5 +37,24 @@ describe('pickMascot', () => {
 
   it('keeps the plain base dino when every level rounds to 1', () => {
     expect(pickMascot([c('PROG', 1.2)]).layers).toEqual([BASE_SPRITE]);
+  });
+});
+
+describe('eggStage', () => {
+  it('starts with a whole egg', () => {
+    expect(eggStage(0, 20)).toBe(0);
+    expect(eggStage(0, 0)).toBe(0);
+  });
+
+  it('cracks more as the answers go up', () => {
+    expect(eggStage(4, 20)).toBe(1);
+    expect(eggStage(10, 20)).toBe(2);
+    expect(eggStage(15, 20)).toBe(3);
+    expect(eggStage(20, 20)).toBe(4);
+  });
+
+  it('has one sprite per stage', () => {
+    expect(EGG_STAGES).toHaveLength(5);
+    EGG_STAGES.forEach((src) => expect(src).toBeTruthy());
   });
 });

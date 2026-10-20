@@ -16,6 +16,9 @@ export const AREAS = {
   EQUIPA: { key: 'equipa', label: 'Trabalho em grupo', title: 'team player' },
 };
 
+// Ordem em que os acessórios são desenhados (o último fica por cima).
+const LAYER_ORDER = ['EQUIPA', 'TEMPO', 'PROG', 'ORG'];
+
 // A partir deste nível a área pinta o corpo todo.
 export const COLOR_LEVEL = 3;
 
@@ -50,8 +53,9 @@ export function pickMascot(competencies = []) {
   const colored = max >= COLOR_LEVEL;
 
   const body = colored ? sprite(`body-${AREAS[dominant].key}`) : BASE_SPRITE;
-  // Acessórios: primeiro as outras áreas, por fim a área dominante (fica por cima).
-  const order = [...codes.filter((code) => code !== dominant), dominant];
+  // Acessórios por ordem fixa: primeiro o que pinta a barriga (equipa), depois os objetos
+  // (relógio, portátil, prancheta), para a prancheta nunca ficar pintada por baixo.
+  const order = LAYER_ORDER.filter((code) => codes.includes(code));
   const accessories = order
     .filter((code) => levels[code] >= 2)
     .map((code) => sprite(`${AREAS[code].key}-${levels[code]}`));
@@ -65,3 +69,20 @@ export function pickMascot(competencies = []) {
     levels,
   };
 }
+
+// Ovo do quiz inicial: racha à medida que o estudante responde (#35).
+export const EGG_STAGES = [0, 1, 2, 3, 4].map((n) => sprite(`egg-${n}`));
+export const SHELL_SPRITE = sprite('shell');
+
+/**
+ * Fase do ovo (0 = inteiro, 4 = quase a abrir) a partir das respostas dadas.
+ * @param {number} answered perguntas respondidas
+ * @param {number} total total de perguntas
+ */
+export function eggStage(answered, total) {
+  if (!total || answered <= 0) return 0;
+  return Math.min(4, Math.floor((answered / total) * 5));
+}
+
+// Pix do administrador: versão ultra rara (roxo real, coroa e brilhos dourados). Não passa pelo quiz.
+export const ADMIN_SPRITE = sprite('admin');

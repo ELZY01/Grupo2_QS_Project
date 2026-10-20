@@ -1,5 +1,5 @@
 import Mascot from './Mascot.jsx';
-import { BASE_SPRITE } from './mascot';
+import { BASE_SPRITE } from './mascot.js';
 
 // Dicas da mascote para quem está a começar (tutorial).
 const TIPS = {
