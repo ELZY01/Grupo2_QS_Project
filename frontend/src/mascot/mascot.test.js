@@ -18,7 +18,7 @@ describe('pickMascot', () => {
     expect(m.level).toBe(4);
     expect(m.tie).toBe(false);
     expect(m.layers[0]).toContain('body-tempo');
-    expect(m.layers.slice(1).join(' ')).toMatch(/org-2.*prog-3.*tempo-4/);
+    expect(m.layers.slice(1).join(' ')).toMatch(/tempo-4.*prog-3.*org-2/);
     expect(m.layers.join(' ')).not.toContain('equipa');
   });
 
