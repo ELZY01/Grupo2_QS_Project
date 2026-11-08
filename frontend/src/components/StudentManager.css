@@ -1,97 +1,218 @@
+/* Gestão de estudantes: tabela à esquerda (8), formulário fixo à direita (4). */
 .student-manager {
   display: grid;
-  gap: 20px;
+  gap: var(--s-5);
 }
 
-.student-form {
+.manager-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-  gap: 14px 16px;
+  grid-template-columns: minmax(0, 8fr) minmax(280px, 4fr);
+  gap: var(--s-6);
+  align-items: start;
+}
+
+.manager-list {
+  display: grid;
+  gap: var(--s-3);
+  min-width: 0;
+}
+
+.manager-list-head {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+
+.manager-list-head h3 {
+  font-size: var(--text-md);
+}
+
+.count {
+  padding: 0 6px;
+  border-radius: 4px;
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: var(--text-xs);
+  line-height: 18px;
+}
+
+/* Formulário em painel lateral */
+.student-form {
+  position: sticky;
+  top: var(--s-6);
+  display: grid;
+  gap: var(--s-3);
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 22px;
+  border-radius: var(--radius-lg);
+  padding: var(--s-5);
 }
 
 .student-form h3 {
-  grid-column: 1 / -1;
-  font-size: 1.05rem;
+  font-size: var(--text-md);
+  padding-bottom: var(--s-3);
+  margin-bottom: var(--s-1);
+  border-bottom: 1px solid var(--line);
 }
 
 .student-form label {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  font-weight: 600;
-  font-size: 0.85rem;
-}
-
-.student-form-actions,
-.student-form .student-error {
-  grid-column: 1 / -1;
+  display: grid;
+  gap: var(--s-1);
+  font-weight: 500;
+  font-size: var(--text-sm);
+  color: var(--ink-2);
 }
 
 .student-form-actions {
   display: flex;
-  gap: 8px;
+  gap: var(--s-2);
+  margin-top: var(--s-2);
+}
+
+.student-form-actions button[type='submit'] {
+  flex: 1;
+}
+
+.student-error,
+.student-success {
+  margin: 0;
+  padding: var(--s-2) var(--s-3);
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  font-size: var(--text-sm);
 }
 
 .student-error {
-  margin: 0;
-  padding: 10px 12px;
-  border-radius: var(--radius-sm);
   background: var(--danger-soft);
+  border-color: color-mix(in srgb, var(--danger) 25%, transparent);
   color: var(--danger);
-  font-size: 0.9rem;
 }
 
 .student-success {
-  margin: 0;
-  padding: 10px 12px;
-  border-radius: var(--radius-sm);
-  background: var(--primary-soft);
+  background: var(--success-soft);
+  border-color: var(--primary-line);
   color: var(--success);
-  font-size: 0.9rem;
+}
+
+/* Tabela densa, com bordas e sem sombra */
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
 }
 
 .student-table {
   width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  overflow: hidden;
-  font-size: 0.92rem;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
 }
 
 .student-table th {
-  background: var(--surface-2);
+  background: var(--bg);
   color: var(--muted);
-  font-size: 0.78rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  font-size: var(--text-xs);
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 .student-table th,
 .student-table td {
-  padding: 12px 14px;
+  height: 40px;
+  padding: 0 var(--s-3);
   border-bottom: 1px solid var(--line);
   text-align: left;
 }
 
-.student-table tr:last-child td {
+.student-table tbody tr:last-child td {
   border-bottom: 0;
+}
+
+.student-table tbody tr {
+  transition: background-color var(--t-fast) var(--ease);
+}
+
+.student-table tbody tr:hover {
+  background: var(--bg);
+}
+
+.student-table tr.is-editing {
+  background: var(--primary-soft);
+}
+
+.student-table tr.is-editing:hover {
+  background: var(--primary-soft);
+}
+
+.student-table .num {
+  text-align: right;
+}
+
+.student-table .strong {
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.student-table .muted {
+  color: var(--muted);
+  white-space: nowrap;
 }
 
 .student-table td:last-child {
   text-align: right;
+  width: 1%;
 }
 
-.student-table td button {
-  padding: 6px 12px;
-  font-size: 0.82rem;
+.row-action {
+  padding: 2px var(--s-2);
+  font-size: var(--text-xs);
+  border-color: transparent;
+  background: transparent;
+  color: var(--ink-2);
+}
+
+.row-action:hover:not(:disabled) {
+  border-color: var(--line-strong);
+  background: var(--surface);
+}
+
+/* Estado vazio */
+.empty-state {
+  display: grid;
+  gap: var(--s-1);
+  padding: var(--s-8) var(--s-6);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-lg);
+}
+
+.empty-title {
+  font-weight: 500;
+}
+
+.empty-text {
+  color: var(--muted);
+  font-size: var(--text-sm);
+  max-width: 52ch;
+}
+
+@media (max-width: 1080px) {
+  .manager-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .manager-grid > .student-form {
+    order: -1;
+    position: static;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+
+  .student-form h3,
+  .student-form-actions,
+  .student-form .student-error {
+    grid-column: 1 / -1;
+  }
+
+  .student-form-actions button[type='submit'] {
+    flex: 0 0 auto;
+  }
 }

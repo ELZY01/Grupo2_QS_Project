@@ -46,7 +46,7 @@ export default function CompetencyProfile({ studentId, refreshKey = 0 }) {
     <section className="record-card" aria-labelledby="profile-title">
       <h3 id="profile-title">Perfil de competências</h3>
 
-      {loading && !profile && <p>A calcular o perfil…</p>}
+      {loading && !profile && <p className="loading">A calcular o perfil…</p>}
 
       {error && (
         <p className="record-error" role="alert">

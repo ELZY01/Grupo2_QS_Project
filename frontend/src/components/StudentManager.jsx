@@ -74,29 +74,40 @@ export default function StudentManager() {
     <section className="student-manager">
       <h2>Estudantes</h2>
 
-      <StudentForm
-        student={editing}
-        onSubmit={handleSubmit}
-        onCancel={handleCancel}
-        error={formError}
-        saving={saving}
-      />
+      <div className="manager-grid">
+        <div className="manager-list">
+          <div className="manager-list-head">
+            <h3>Registados</h3>
+            {!loading && !loadError && <span className="count mono">{students.length}</span>}
+          </div>
 
-      {success && (
-        <p className="student-success" role="status">
-          {success}
-        </p>
-      )}
+          {success && (
+            <p className="student-success" role="status">
+              {success}
+            </p>
+          )}
 
-      {loading && <p>A carregar estudantes...</p>}
+          {loading && <p className="loading">A carregar estudantes…</p>}
 
-      {!loading && loadError && (
-        <p className="student-error" role="alert">
-          Não foi possível carregar os estudantes ({loadError}).
-        </p>
-      )}
+          {!loading && loadError && (
+            <p className="student-error" role="alert">
+              Não foi possível carregar os estudantes ({loadError}).
+            </p>
+          )}
 
-      {!loading && !loadError && <StudentList students={students} onEdit={handleEdit} />}
+          {!loading && !loadError && (
+            <StudentList students={students} onEdit={handleEdit} editingId={editing?.id} />
+          )}
+        </div>
+
+        <StudentForm
+          student={editing}
+          onSubmit={handleSubmit}
+          onCancel={handleCancel}
+          error={formError}
+          saving={saving}
+        />
+      </div>
     </section>
   );
 }

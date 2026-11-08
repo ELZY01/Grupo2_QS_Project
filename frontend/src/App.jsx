@@ -38,6 +38,11 @@ export default function App() {
 
   return (
     <div className="sx">
+      {screen !== 'welcome' && (
+        <header className="sx-authbar">
+          <p className="sx-brand">StudyMatch</p>
+        </header>
+      )}
       {screen === 'welcome' && (
         <Welcome onStart={() => setScreen('register')} onLogin={() => setScreen('login')} />
       )}
