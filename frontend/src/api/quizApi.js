@@ -1,31 +1,33 @@
-const API_BASE_URL = 'http://localhost:8080/api';
+import { request } from './http';
 
-// Obter as 20 perguntas do quiz agrupadas/associadas
-export const fetchQuiz = async () => {
-    const response = await fetch(`${API_BASE_URL}/quiz`);
-    if (!response.ok) {
-        throw new Error('Não foi possível carregar o questionário.');
-    }
-    return response.json();
+// Mensagens usadas quando a API não envia o texto do erro.
+const QUIZ_ERRORS = {
+    400: 'As respostas do quiz são inválidas. Responde às 20 perguntas.',
+    404: 'Estudante ou quiz não encontrado.',
 };
 
-// Submeter as respostas do estudante
-export const submitQuizSubmission = async (studentId, quizId, answers) => {
-    const response = await fetch(`${API_BASE_URL}/students/${studentId}/quiz-submissions`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
+/**
+ * GET /api/quiz
+ * @returns {Promise<Array>} as 20 perguntas do quiz inicial
+ */
+export function fetchQuiz() {
+    return request('/quiz', {}, QUIZ_ERRORS);
+}
+
+/**
+ * POST /api/students/{studentId}/quiz-submissions
+ * @param {number} studentId identificador do estudante
+ * @param {number} quizId identificador do quiz
+ * @param {Array<{questionId: number, value: number}>} answers respostas de 1 a 5
+ */
+export function submitQuizSubmission(studentId, quizId, answers) {
+    return request(
+        `/students/${studentId}/quiz-submissions`,
+        {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ quizId, answers }),
         },
-        body: JSON.stringify({
-            quizId: quizId,
-            answers: answers
-        }),
-    });
-
-    if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Erro ao submeter as respostas do quiz.');
-    }
-
-    return response.json();
-};
+        QUIZ_ERRORS
+    );
+}
