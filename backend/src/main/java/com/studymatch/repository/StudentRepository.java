@@ -3,6 +3,8 @@ package com.studymatch.repository;
 import com.studymatch.model.Student;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Optional;
+
 /**
  * Repositório responsável pelo acesso aos estudantes
  * guardados na base de dados.
@@ -23,4 +25,7 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
 
     // Verifica se outro estudante já utiliza este número.
     boolean existsByStudentNumberAndIdNot(String studentNumber, Long id);
+
+    // Procura o estudante pelo email ou pelo número (login do aluno).
+    Optional<Student> findByEmailIgnoreCaseOrStudentNumberIgnoreCase(String email, String studentNumber);
 }
