@@ -14,6 +14,7 @@ const json = (method, body) => ({
 export function login(username, password) {
   return request('/auth/login', json('POST', { username, password }), {
     401: 'Utilizador ou palavra-passe errados.',
+    429: 'Demasiadas tentativas falhadas. Tenta de novo daqui a alguns minutos.',
   });
 }
 

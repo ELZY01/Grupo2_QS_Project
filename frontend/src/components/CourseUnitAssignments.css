@@ -1,0 +1,109 @@
+/* Admin: docentes e alunos de cada UC */
+.assignments {
+  display: grid;
+  gap: 20px;
+}
+
+.assignments h2 {
+  margin: 0 0 12px;
+  font-size: 1.1rem;
+}
+
+.assignments label {
+  display: grid;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.assign-picker select {
+  max-width: 480px;
+}
+
+.assign-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  align-items: start;
+}
+
+.assign-grid .card {
+  display: grid;
+  gap: 12px;
+}
+
+.assign-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.assign-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.assign-list li:last-child {
+  border-bottom: 0;
+}
+
+.assign-candidates {
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+
+.assign-add {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 8px;
+}
+
+.assign-add label {
+  flex: 1 1 200px;
+}
+
+.assign-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.assign-teacher-form {
+  display: grid;
+  gap: 12px;
+}
+
+.assign-muted,
+.assign-empty {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.assign-empty {
+  margin: 0;
+}
+
+.assign-error,
+.assign-success {
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+}
+
+.assign-error {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.assign-success {
+  background: var(--primary-soft);
+  color: var(--success);
+}

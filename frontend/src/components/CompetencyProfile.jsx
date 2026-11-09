@@ -21,7 +21,11 @@ const percent = (value) => `${Math.round(value * 100)}%`;
  * @param {number} studentId estudante selecionado
  * @param {number} refreshKey muda quando o histórico é alterado, para recalcular o perfil
  */
-export default function CompetencyProfile({ studentId, refreshKey = 0 }) {
+/**
+ * @param {boolean} forStudent true quando é o próprio aluno a ver (textos na 2.ª pessoa);
+ *                             false para o docente (textos sobre "este aluno").
+ */
+export default function CompetencyProfile({ studentId, refreshKey = 0, forStudent = true }) {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -56,7 +60,7 @@ export default function CompetencyProfile({ studentId, refreshKey = 0 }) {
 
       {profile && !error && (
         <>
-          <ProfileMascot competencies={profile.competencies} name={profile.studentName} />
+          <ProfileMascot competencies={profile.competencies} name={profile.studentName} forStudent={forStudent} />
 
           <p className="profile-summary">
             {profile.completedCourseUnits} UC(s) concluída(s) · o quiz conta{' '}
@@ -65,7 +69,9 @@ export default function CompetencyProfile({ studentId, refreshKey = 0 }) {
 
           {!profile.quizCompleted && (
             <p className="profile-hint">
-              Ainda não respondeste ao quiz inicial. Faz o quiz para teres um perfil desde já.
+              {forStudent
+                ? 'Ainda não respondeste ao quiz inicial. Faz o quiz para teres um perfil desde já.'
+                : 'Este aluno ainda não respondeu ao quiz inicial.'}
             </p>
           )}
 
@@ -80,7 +86,7 @@ export default function CompetencyProfile({ studentId, refreshKey = 0 }) {
   );
 }
 
-function ProfileMascot({ competencies, name }) {
+function ProfileMascot({ competencies, name, forStudent }) {
   const mascot = pickMascot(competencies);
   const text = mascot.area
     ? `Pix ${mascot.area.title} · nível ${mascot.level}`
@@ -88,8 +94,10 @@ function ProfileMascot({ competencies, name }) {
   const hint = mascot.area
     ? mascot.tie
       ? 'Tens mais do que uma área no topo: a cor vem da primeira e os acessórios mostram todas.'
-      : `A cor vem da tua área mais forte (${mascot.area.label}); os acessórios mostram as outras.`
-    : 'Faz o quiz ou regista notas para o Pix evoluir.';
+      : `A cor vem da ${forStudent ? 'tua ' : ''}área mais forte (${mascot.area.label}); os acessórios mostram as outras.`
+    : forStudent
+      ? 'Faz o quiz ou regista notas para o Pix evoluir.'
+      : 'Ainda não há quiz nem notas para o Pix evoluir.';
 
   return (
     <div className="profile-mascot">

@@ -8,6 +8,7 @@ import com.studymatch.model.Role;
 import com.studymatch.model.Student;
 import com.studymatch.repository.AppUserRepository;
 import com.studymatch.repository.StudentRepository;
+import com.studymatch.security.LoginThrottle;
 import com.studymatch.security.TokenService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -32,31 +33,45 @@ public class AuthService {
     private final StudentService studentService;
     private final PasswordEncoder passwordEncoder;
     private final TokenService tokenService;
+    private final LoginThrottle throttle;
 
     public AuthService(AppUserRepository userRepository,
                        StudentRepository studentRepository,
                        StudentService studentService,
                        PasswordEncoder passwordEncoder,
-                       TokenService tokenService) {
+                       TokenService tokenService,
+                       LoginThrottle throttle) {
         this.userRepository = userRepository;
         this.studentRepository = studentRepository;
         this.studentService = studentService;
         this.passwordEncoder = passwordEncoder;
         this.tokenService = tokenService;
+        this.throttle = throttle;
     }
 
     /**
      * Inicia sessão. O aluno pode usar o número de estudante ou o email.
      * A mensagem de erro é a mesma para utilizador inexistente e palavra-passe errada.
+     * Depois de várias falhas seguidas, o utilizador fica bloqueado durante um tempo (429).
      */
     public LoginResponse login(LoginRequest request) {
         String username = request == null || request.username() == null ? "" : request.username().trim();
         String password = request == null || request.password() == null ? "" : request.password();
 
+        if (throttle.isBlocked(username)) {
+            throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,
+                    "Demasiadas tentativas falhadas. Tenta de novo daqui a alguns minutos.");
+        }
+
         AppUser user = findAccount(username)
                 .filter(u -> passwordEncoder.matches(password, u.getPasswordHash()))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, WRONG_CREDENTIALS));
+                .orElse(null);
+        if (user == null) {
+            throttle.recordFailure(username);
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, WRONG_CREDENTIALS);
+        }
 
+        throttle.recordSuccess(username);
         return sessionFor(user);
     }
 

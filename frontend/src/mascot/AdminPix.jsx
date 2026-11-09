@@ -4,6 +4,7 @@ import { ADMIN_SPRITE } from './mascot.js';
 const TIPS = {
   students: 'Bem-vindo, admin! Aqui geres os estudantes. Eles próprios fazem o quiz quando entram.',
   records: 'Lança as cadeiras e as notas de cada estudante. O Pix deles evolui com isto!',
+  classes: 'Escolhe uma UC, associa o docente e inscreve os alunos. O docente só vê estes alunos!',
 };
 
 /**
