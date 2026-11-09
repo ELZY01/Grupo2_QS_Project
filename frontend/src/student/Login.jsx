@@ -1,42 +1,33 @@
 import { useState } from 'react';
-import { getStudents } from '../api/studentApi';
-import { ADMIN_USER, isAdminLogin } from '../auth/session.js';
+import { login } from '../api/authApi';
 
 /**
- * Entrar: o estudante usa o número ou o email; o administrador usa o seu utilizador e palavra-passe.
+ * Entrar: o aluno usa o número de estudante ou o email; o admin e o docente usam o seu utilizador.
+ * A palavra-passe é sempre verificada no backend.
  */
-export default function Login({ onBack, onRegister, onStudent, onAdmin }) {
+export default function Login({ onBack, onRegister, onLogin }) {
   const [user, setUser] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
   const [searching, setSearching] = useState(false);
 
-  const isAdmin = user.trim().toLowerCase() === ADMIN_USER.toLowerCase();
-
   const submit = async (e) => {
     e.preventDefault();
     setError(null);
-    const query = user.trim().toLowerCase();
+    const username = user.trim();
 
-    if (!query) {
-      setError('Escreve o teu número de estudante ou o email.');
+    if (!username) {
+      setError('Escreve o teu número de estudante, o email ou o utilizador.');
       return;
     }
-
-    if (isAdmin) {
-      if (isAdminLogin(ADMIN_USER, password)) onAdmin();
-      else setError('Palavra-passe de administrador errada.');
+    if (!password) {
+      setError('Escreve a palavra-passe.');
       return;
     }
 
     setSearching(true);
     try {
-      const students = await getStudents();
-      const found = students.find(
-        (s) => String(s.studentNumber).toLowerCase() === query || String(s.email).toLowerCase() === query
-      );
-      if (found) onStudent(found);
-      else setError('Não encontrámos ninguém com esses dados. Confirma ou cria o teu perfil.');
+      onLogin(await login(username, password));
     } catch (err) {
       setError(err.message);
     } finally {
@@ -51,21 +42,19 @@ export default function Login({ onBack, onRegister, onStudent, onAdmin }) {
         <p className="sx-muted">O teu Pix está à tua espera.</p>
 
         <label>
-          Número de estudante ou email
+          Número de estudante, email ou utilizador
           <input value={user} onChange={(e) => setUser(e.target.value)} autoComplete="username" autoFocus />
         </label>
 
-        {isAdmin && (
-          <label>
-            Palavra-passe
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete="current-password"
-            />
-          </label>
-        )}
+        <label>
+          Palavra-passe
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoComplete="current-password"
+          />
+        </label>
 
         {error && (
           <p className="sx-error" role="alert">
@@ -75,7 +64,7 @@ export default function Login({ onBack, onRegister, onStudent, onAdmin }) {
 
         <div className="sx-actions">
           <button type="submit" className="btn-primary sx-big" disabled={searching}>
-            {searching ? 'A procurar…' : 'Entrar'}
+            {searching ? 'A entrar…' : 'Entrar'}
           </button>
           <button type="button" className="sx-link" onClick={onRegister}>
             Criar perfil

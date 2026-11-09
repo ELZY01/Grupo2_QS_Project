@@ -104,4 +104,12 @@ describe('CompetencyProfile', () => {
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Estudante não encontrado.');
   });
+
+  it('talks about "this student" when a teacher is viewing the profile', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(jsonResponse(200, { ...PROFILE, quizCompleted: false }));
+    render(<CompetencyProfile studentId={7} forStudent={false} />);
+
+    expect(await screen.findByText('Este aluno ainda não respondeu ao quiz inicial.')).toBeInTheDocument();
+    expect(screen.queryByText(/respondeste/)).toBeNull();
+  });
 });

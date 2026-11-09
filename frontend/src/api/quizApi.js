@@ -1,8 +1,10 @@
-const API_BASE_URL = 'http://localhost:8080/api';
+import { API_URL, apiFetch } from './http';
+
+const API_BASE_URL = `${API_URL}/api`;
 
 // Obter as 20 perguntas do quiz agrupadas/associadas
 export const fetchQuiz = async () => {
-    const response = await fetch(`${API_BASE_URL}/quiz`);
+    const response = await apiFetch(`${API_BASE_URL}/quiz`);
     if (!response.ok) {
         throw new Error('Não foi possível carregar o questionário.');
     }
@@ -11,7 +13,7 @@ export const fetchQuiz = async () => {
 
 // Submeter as respostas do estudante
 export const submitQuizSubmission = async (studentId, quizId, answers) => {
-    const response = await fetch(`${API_BASE_URL}/students/${studentId}/quiz-submissions`, {
+    const response = await apiFetch(`${API_BASE_URL}/students/${studentId}/quiz-submissions`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

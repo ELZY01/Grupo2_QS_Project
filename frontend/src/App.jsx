@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import AdminApp from './AdminApp.jsx';
-import { readSession, saveSession } from './auth/session.js';
+import { logout as logoutApi } from './api/authApi';
+import { SESSION_EXPIRED_EVENT, readSession, saveSession, sessionFromLogin } from './auth/session.js';
+import TeacherApp from './teacher/TeacherApp.jsx';
 import Login from './student/Login.jsx';
 import Register from './student/Register.jsx';
 import StudentApp from './student/StudentApp.jsx';
@@ -11,6 +13,7 @@ import './student/student.css';
  * Ponto de entrada:
  * - sem sessão: boas-vindas, entrar ou criar conta;
  * - administrador: área de gestão (estudantes e cadeiras), com o Pix real;
+ * - docente: as suas UCs e os alunos inscritos;
  * - estudante: quiz obrigatório até o Pix nascer e depois a área do estudante.
  */
 export default function App() {
@@ -18,19 +21,38 @@ export default function App() {
   const [screen, setScreen] = useState('welcome');
   const [justRegistered, setJustRegistered] = useState(false);
 
-  const login = (next, isNew = false) => {
+  const login = (response, isNew = false) => {
+    const next = sessionFromLogin(response);
     saveSession(next);
     setJustRegistered(isNew);
     setSession(next);
   };
 
-  const logout = () => {
+  const endSession = () => {
     saveSession(null);
     setSession(null);
     setScreen('welcome');
   };
 
+  const logout = async () => {
+    await logoutApi();
+    endSession();
+  };
+
+  // Token expirado ou backend reiniciado: volta ao ecrã de entrada.
+  useEffect(() => {
+    const onExpired = () => {
+      saveSession(null);
+      setSession(null);
+      setScreen('login');
+    };
+    window.addEventListener(SESSION_EXPIRED_EVENT, onExpired);
+    return () => window.removeEventListener(SESSION_EXPIRED_EVENT, onExpired);
+  }, []);
+
   if (session?.role === 'admin') return <AdminApp onLogout={logout} />;
+
+  if (session?.role === 'docente') return <TeacherApp name={session.name} onLogout={logout} />;
 
   if (session?.role === 'student') {
     return <StudentApp studentId={session.id} startWithQuiz={justRegistered} onLogout={logout} />;
@@ -44,15 +66,14 @@ export default function App() {
       {screen === 'register' && (
         <Register
           onBack={() => setScreen('welcome')}
-          onCreated={(s) => login({ role: 'student', id: s.id }, true)}
+          onCreated={(response) => login(response, true)}
         />
       )}
       {screen === 'login' && (
         <Login
           onBack={() => setScreen('welcome')}
           onRegister={() => setScreen('register')}
-          onStudent={(s) => login({ role: 'student', id: s.id })}
-          onAdmin={() => login({ role: 'admin' })}
+          onLogin={(response) => login(response)}
         />
       )}
     </div>
