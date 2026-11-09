@@ -33,6 +33,8 @@ describe('GroupForming', () => {
       expect(lobby.innerHTML).toContain(body);
     });
     expect(lobby).toHaveTextContent('✦');
+    expect(lobby.querySelectorAll('.lobby-confetti')).toHaveLength(8);
+    expect(lobby.querySelector('.lobby-stars')).not.toBeNull();
   });
 
   it('only shows the text when the user prefers reduced motion', () => {

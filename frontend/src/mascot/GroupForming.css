@@ -1,5 +1,20 @@
-/* US17: lobby de esquadra com os 4 Pix enquanto os grupos são gerados */
+/*
+ * US17: lobby com os 4 Pix enquanto os grupos são gerados.
+ * Estilo pixel art (bordas grossas e sombras "duras"), como a mascote.
+ * De dia: céu claro e sol. No modo noturno: céu escuro, estrelas e lua.
+ * Cores sólidas, sem gradientes; as cores das áreas vêm da folha de design do Pix.
+ */
 .group-forming {
+  --lobby-sky: #d6e6ee;
+  --lobby-ground: #b7cc9c;
+  --lobby-ground-edge: #9db783;
+  --lobby-frame: #1d2a23;
+  --lobby-text: #1d2a23;
+  --lobby-body: #f2c14e;
+  --lobby-body-edge: #d9a530;
+  --lobby-shadow: rgba(29, 42, 35, 0.22);
+  --lobby-stars: 0;
+
   display: grid;
   justify-items: center;
   gap: 12px;
@@ -7,28 +22,97 @@
   text-align: center;
 }
 
+/* Modo noturno: segue o sistema, ou data-theme="dark" quando há botão de tema. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .group-forming {
+    --lobby-sky: #131a29;
+    --lobby-ground: #1f2d24;
+    --lobby-ground-edge: #2b3d31;
+    --lobby-frame: #0a0d14;
+    --lobby-text: #f1ede2;
+    --lobby-body: #ebe5d2;
+    --lobby-body-edge: #c9c2ab;
+    --lobby-shadow: rgba(0, 0, 0, 0.45);
+    --lobby-stars: 1;
+  }
+}
+
+:root[data-theme='dark'] .group-forming {
+  --lobby-sky: #131a29;
+  --lobby-ground: #1f2d24;
+  --lobby-ground-edge: #2b3d31;
+  --lobby-frame: #0a0d14;
+  --lobby-text: #f1ede2;
+  --lobby-body: #ebe5d2;
+  --lobby-body-edge: #c9c2ab;
+  --lobby-shadow: rgba(0, 0, 0, 0.45);
+  --lobby-stars: 1;
+}
+
 .lobby {
   position: relative;
   width: 340px;
   max-width: 100%;
-  padding: 10px 10px 14px;
-  border: 3px solid var(--ink);
-  border-radius: 12px;
-  background:
-    radial-gradient(ellipse at 50% 110%, rgba(255, 255, 255, 0.35), transparent 60%),
-    linear-gradient(180deg, #3b4fb8 0%, #7a4fc4 55%, #c46aa8 100%);
-  box-shadow: 4px 4px 0 var(--ink);
+  padding: 10px 10px 18px;
+  border: 3px solid var(--lobby-frame);
+  border-radius: 8px;
+  background: var(--lobby-sky);
+  box-shadow: 4px 4px 0 var(--lobby-frame);
   overflow: hidden;
+  isolation: isolate;
+}
+
+/* Sol de dia, lua à noite (a "cratera" só aparece no modo noturno) */
+.lobby-sky-body {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--lobby-body);
+  box-shadow:
+    inset -4px -4px 0 var(--lobby-body-edge),
+    inset calc(var(--lobby-stars) * 5px) calc(var(--lobby-stars) * 3px) 0 calc(var(--lobby-stars) * -6px) var(--lobby-body-edge);
+  z-index: -1;
+}
+
+/* Estrelas: pontos de 2px desenhados com box-shadow, só à noite */
+.lobby-stars {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2px;
+  height: 2px;
+  background: transparent;
+  opacity: var(--lobby-stars);
+  box-shadow:
+    18px 14px #f1ede2, 52px 30px #f1ede2, 88px 10px #f1ede2, 120px 38px #f1ede2,
+    150px 18px #f1ede2, 196px 8px #f1ede2, 226px 34px #f1ede2, 262px 20px #f1ede2,
+    34px 52px #f1ede2, 240px 56px #f1ede2, 300px 44px #f1ede2, 70px 66px #f1ede2;
+  z-index: -1;
+}
+
+/* Chão onde os Pix aterram */
+.lobby-ground {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 30px;
+  background: var(--lobby-ground);
+  border-top: 3px solid var(--lobby-ground-edge);
+  z-index: -1;
 }
 
 .lobby-header {
+  position: relative;
   margin: 0 0 8px;
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: #fff;
-  text-shadow: 2px 2px 0 var(--ink);
+  color: var(--lobby-text);
 }
 
 .lobby-squad {
@@ -37,10 +121,10 @@
   gap: 8px;
 }
 
-.lobby-slot-org    { --area: #6f9fe0; }
-.lobby-slot-tempo  { --area: #e8be55; }
-.lobby-slot-prog   { --area: #6cc29a; }
-.lobby-slot-equipa { --area: #df7fb2; }
+.lobby-slot-org    { --area: var(--area-org, #6f9fe0); }
+.lobby-slot-tempo  { --area: var(--area-tempo, #e8be55); }
+.lobby-slot-prog   { --area: var(--area-prog, #6cc29a); }
+.lobby-slot-equipa { --area: var(--area-equipa, #df7fb2); }
 
 .lobby-slot {
   position: relative;
@@ -49,11 +133,11 @@
   height: 150px;
 }
 
-/* Banner vertical atrás de cada Pix, com a cor da área */
+/* Banner vertical atrás de cada Pix, com a cor da área e riscas de pixel */
 .lobby-banner {
   position: absolute;
   inset: 0 4px 22px;
-  border-radius: 6px 6px 0 0;
+  border-radius: 4px 4px 0 0;
   background:
     repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0 6px, transparent 6px 12px),
     var(--area);
@@ -69,7 +153,7 @@
   font-weight: 800;
   line-height: 1.15;
   text-transform: uppercase;
-  color: var(--ink);
+  color: #1d2a23;
 }
 
 .lobby-pix {
@@ -77,17 +161,17 @@
   bottom: 18px;
 }
 
-/* Plataforma a brilhar por baixo de cada Pix */
+/* Sombra no chão por baixo de cada Pix */
 .lobby-pix::after {
   content: '';
   position: absolute;
   left: 50%;
-  bottom: -6px;
-  width: 54px;
-  height: 10px;
+  bottom: -5px;
+  width: 40px;
+  height: 7px;
   translate: -50% 0;
   border-radius: 50%;
-  background: radial-gradient(ellipse, rgba(255, 255, 255, 0.85), transparent 70%);
+  background: var(--lobby-shadow);
   z-index: -1;
 }
 
@@ -95,14 +179,14 @@
   position: absolute;
   bottom: 0;
   padding: 1px 6px;
-  border: 2px solid var(--ink);
+  border: 2px solid #1d2a23;
   border-radius: 4px;
   font-size: 10px;
   font-weight: 800;
   text-transform: uppercase;
   white-space: nowrap;
   background: #a9ff68;
-  color: var(--ink);
+  color: #1d2a23;
 }
 
 .lobby-spark {
@@ -113,22 +197,40 @@
   font-size: 44px;
   line-height: 1;
   color: #ffd23a;
-  text-shadow: 3px 3px 0 var(--ink);
+  text-shadow: 3px 3px 0 var(--lobby-frame);
   opacity: 0;
   pointer-events: none;
   z-index: 2;
 }
 
-/* Barra de "matchmaking" com o texto */
+/* Confettis quadrados (pixels) que saltam do high five */
+.lobby-confetti {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: 7px;
+  height: 7px;
+  margin: -3px 0 0 -3px;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.lobby-confetti-org    { background: var(--area-org, #6f9fe0); }
+.lobby-confetti-tempo  { background: var(--area-tempo, #e8be55); }
+.lobby-confetti-prog   { background: var(--area-prog, #6cc29a); }
+.lobby-confetti-equipa { background: var(--area-equipa, #df7fb2); }
+
+/* Barra de "matchmaking" com o texto e um progresso a andar */
 .lobby-bar {
   position: relative;
   width: 340px;
   max-width: 100%;
-  padding: 8px 12px;
-  border: 3px solid var(--ink);
-  border-radius: 8px;
+  padding: 8px 12px 11px;
+  border: 3px solid var(--lobby-frame);
+  border-radius: 6px;
   background: var(--surface);
-  box-shadow: 3px 3px 0 var(--ink);
+  box-shadow: 3px 3px 0 var(--lobby-frame);
   overflow: hidden;
 }
 
@@ -156,15 +258,24 @@
   .lobby-spark {
     animation: squad-high-five 2.4s ease-out infinite;
   }
+  .lobby-confetti {
+    animation: confetti-burst 2.4s ease-out infinite;
+  }
   .lobby-header {
     animation: group-formed 2.4s ease-out infinite;
+  }
+  .lobby-stars {
+    animation: stars-twinkle 1.2s steps(2) infinite;
   }
   .lobby-bar::before {
     content: '';
     position: absolute;
-    inset: 0;
-    background: linear-gradient(90deg, transparent, var(--primary-soft), transparent);
-    animation: matchmaking-sweep 1.2s linear infinite;
+    left: 0;
+    bottom: 0;
+    width: 30%;
+    height: 3px;
+    background: var(--primary);
+    animation: matchmaking-progress 1.2s ease-in-out infinite;
   }
 }
 
@@ -188,8 +299,10 @@
   25%  { transform: translateY(-5px); }
   30%  { transform: translateY(0); }
   58%  { transform: translateY(0); }
-  64%  { transform: translateY(-8px); }
-  70%  { transform: translateY(0); }
+  64%  { transform: translateY(-10px) rotate(-6deg); }
+  70%  { transform: translateY(0) rotate(0); }
+  76%  { transform: translateY(-6px) rotate(6deg); }
+  82%  { transform: translateY(0) rotate(0); }
   90%  { transform: translateY(0); opacity: 1; }
   100% { transform: translateY(0); opacity: 0; }
 }
@@ -207,6 +320,13 @@
   90%, 100% { opacity: 0; transform: scale(0.6) rotate(90deg); }
 }
 
+@keyframes confetti-burst {
+  0%, 60%   { opacity: 0; transform: translate(0, 0) rotate(0); }
+  64%       { opacity: 1; }
+  82%       { opacity: 1; transform: translate(var(--x), var(--y)) rotate(var(--r)); }
+  92%, 100% { opacity: 0; transform: translate(var(--x), calc(var(--y) + 24px)) rotate(var(--r)); }
+}
+
 @keyframes group-formed {
   0%, 58%   { opacity: 0; transform: scale(0.6); }
   66%       { opacity: 1; transform: scale(1.15); }
@@ -214,7 +334,11 @@
   96%, 100% { opacity: 0; transform: scale(1); }
 }
 
-@keyframes matchmaking-sweep {
-  from { transform: translateX(-100%); }
-  to   { transform: translateX(100%); }
+@keyframes stars-twinkle {
+  50% { opacity: calc(var(--lobby-stars) * 0.45); }
+}
+
+@keyframes matchmaking-progress {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(340%); }
 }
