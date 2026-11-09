@@ -207,7 +207,11 @@ export default function CourseUnitAssignments() {
                     <button
                       type="button"
                       disabled={busy}
-                      onClick={() => run(() => enrollStudent(unitId, s.id))}
+                      onClick={() => run(async () => {
+                        const result = await enrollStudent(unitId, s.id);
+                        setSearch('');
+                        return result;
+                      })}
                       aria-label={`Inscrever ${s.name}`}
                     >
                       Inscrever
