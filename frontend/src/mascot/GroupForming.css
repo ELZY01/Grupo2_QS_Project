@@ -53,7 +53,7 @@
   position: relative;
   width: 340px;
   max-width: 100%;
-  padding: 10px 10px 18px;
+  padding: 8px 10px 18px;
   border: 3px solid var(--lobby-frame);
   border-radius: 8px;
   background: var(--lobby-sky);
@@ -65,10 +65,10 @@
 /* Sol de dia, lua à noite (a "cratera" só aparece no modo noturno) */
 .lobby-sky-body {
   position: absolute;
-  top: 10px;
-  right: 14px;
-  width: 22px;
-  height: 22px;
+  top: 7px;
+  right: 12px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
   background: var(--lobby-body);
   box-shadow:
@@ -107,7 +107,8 @@
 
 .lobby-header {
   position: relative;
-  margin: 0 0 8px;
+  margin: 0 0 10px;
+  min-height: 16px;
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 2px;
