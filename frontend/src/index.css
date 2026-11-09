@@ -80,8 +80,9 @@
   font-feature-settings: 'ss01';
 }
 
+/* Modo noturno: segue o sistema, a não ser que a pessoa escolha no botão (data-theme). */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='light']) {
     --bg: #171613;
     --surface: #1f1d1a;
     --surface-2: #272521;
@@ -110,6 +111,36 @@
     --shadow-float: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
     color-scheme: dark;
   }
+}
+
+:root[data-theme='dark'] {
+  --bg: #171613;
+  --surface: #1f1d1a;
+  --surface-2: #272521;
+  --surface-3: #312e29;
+  --line: #34312b;
+  --line-strong: #48443c;
+  --ink: #eeebe3;
+  --ink-2: #cfcbc1;
+  --muted: #9a9487;
+
+  --primary: #55b07a;
+  --primary-hover: #6cc08f;
+  --primary-ink: #0f1d14;
+  --primary-soft: #1f3327;
+  --primary-line: #2f5039;
+
+  --danger: #e57b70;
+  --danger-soft: #3a211d;
+  --success: #6cc08f;
+  --success-soft: #1f3327;
+  --info: #8fb2dc;
+  --info-soft: #1f2a37;
+  --warn: #e0b45e;
+  --warn-soft: #362c18;
+
+  --shadow-float: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
+  color-scheme: dark;
 }
 
 * {
