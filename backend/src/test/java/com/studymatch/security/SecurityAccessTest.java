@@ -168,7 +168,48 @@ class SecurityAccessTest {
         mvc.perform(auth(get("/api/teacher/course-units"), ana.token)).andExpect(status().isForbidden());
     }
 
+    // --- R1/R2: atribuições às UCs ------------------------------------------
+
+    @Test
+    void onlyTheAdminEnrollsStudentsInCourseUnits() throws Exception {
+        Registered ana = register();
+        String admin = login("admin", "studymatch");
+        String teacher = login("docente", "docente123");
+        int unit = testCourseUnitId(admin);
+        String body = "{\"id\":" + ana.id + "}";
+
+        mvc.perform(json(auth(post("/api/admin/course-units/" + unit + "/students"), teacher), body))
+                .andExpect(status().isForbidden());
+        mvc.perform(json(auth(post("/api/admin/course-units/" + unit + "/students"), ana.token), body))
+                .andExpect(status().isForbidden());
+
+        mvc.perform(json(auth(post("/api/admin/course-units/" + unit + "/students"), admin), body))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.students[?(@.id == " + ana.id + ")]").exists());
+        mvc.perform(json(auth(post("/api/admin/course-units/" + unit + "/students"), admin), body))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    void onlyTheAdminAssignsTeachers() throws Exception {
+        String admin = login("admin", "studymatch");
+        String teacher = login("docente", "docente123");
+        int unit = testCourseUnitId(admin);
+
+        mvc.perform(auth(get("/api/admin/teachers"), teacher)).andExpect(status().isForbidden());
+        mvc.perform(auth(get("/api/admin/course-units/" + unit + "/assignments"), admin))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.teachers[0].username").value("docente"));
+    }
+
     // --- Ajudas -----------------------------------------------------------
+
+    private int testCourseUnitId(String adminToken) throws Exception {
+        String body = mvc.perform(auth(get("/api/course-units"), adminToken))
+                .andReturn().getResponse().getContentAsString();
+        java.util.List<Integer> ids = JsonPath.read(body, "$[?(@.code == 'QS-TESTE')].id");
+        return ids.get(0);
+    }
 
     private record Registered(int id, String number, String email, String token) {
     }
