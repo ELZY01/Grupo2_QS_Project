@@ -97,6 +97,25 @@ A API arranca em http://localhost:8080. Para verificar, abrir http://localhost:8
 {"status":"UP","service":"studymatch-backend"}
 ```
 
+### Contas e autenticação
+
+O backend usa Spring Security: todos os pedidos (exceto `GET /api/health`, login e registo) precisam de sessão, e cada perfil só acede ao que lhe pertence (403 caso contrário).
+
+| Perfil | Como entra | O que pode fazer |
+|---|---|---|
+| Admin | utilizador `admin` | estudantes, notas, docentes e inscrições nas UCs |
+| Docente | utilizador dado pelo admin | as suas UCs, os alunos inscritos e as estatísticas de cada aluno |
+| Aluno | número de estudante ou email | só os seus dados (perfil, quiz, histórico) |
+
+No arranque, o backend cria (se não existirem) as contas de demonstração e a UC `QS-TESTE` associada ao docente. As palavras-passe por omissão são só para desenvolvimento; em produção definir as variáveis de ambiente:
+
+| Variável | Por omissão |
+|---|---|
+| `ADMIN_USER` / `ADMIN_PASSWORD` | `admin` / `studymatch` |
+| `DOCENTE_USER` / `DOCENTE_PASSWORD` | `docente` / `docente123` |
+
+**Antes de arrancar esta versão contra o Supabase**, correr no SQL editor, por esta ordem, `backend/src/main/resources/db/migration/V5__create_app_users.sql` e `V6__create_course_unit_assignments.sql` (com `ddl-auto=validate`, o backend não arranca sem as tabelas). Para reverter: `U6__…` e depois `U5__…`. Os alunos que já existiam não têm conta: o admin define-lhes a palavra-passe em *Estudantes → Editar*.
+
 ### 2. Frontend
 
 Num segundo terminal:
