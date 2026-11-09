@@ -6,6 +6,7 @@ import { pickMascot } from '../mascot/mascot.js';
 const ORIGIN = {
   QUIZ: { label: 'Quiz', text: 'Vem só do quiz inicial: ainda não há notas nas UCs desta competência.' },
   HISTORY: { label: 'Histórico', text: 'Vem só das notas: o quiz já não conta para esta competência.' },
+  HISTORY_NO_QUIZ: { label: 'Histórico', text: 'Vem só das notas, porque ainda não fizeste o quiz inicial.' },
   MIXED: { label: 'Misto', text: 'Combina o quiz inicial com as notas das UCs.' },
   NO_DATA: { label: 'Sem dados', text: 'Ainda não há quiz nem notas para calcular esta competência.' },
 };
@@ -59,8 +60,14 @@ export default function CompetencyProfile({ studentId, refreshKey = 0 }) {
           <ProfileMascot competencies={profile.competencies} name={profile.studentName} />
 
           <p className="profile-summary">
-            {profile.completedCourseUnits} UC(s) concluída(s) · o quiz conta{' '}
-            <strong>{percent(profile.quizWeight)}</strong> no perfil
+            {profile.completedCourseUnits} UC(s) concluída(s) ·{' '}
+            {profile.quizCompleted ? (
+              <>
+                o quiz conta <strong>{percent(profile.quizWeight)}</strong> no perfil
+              </>
+            ) : (
+              'sem quiz feito, o perfil vem só das notas'
+            )}
           </p>
 
           {!profile.quizCompleted && (
@@ -71,7 +78,7 @@ export default function CompetencyProfile({ studentId, refreshKey = 0 }) {
 
           <ul className="competency-list">
             {profile.competencies.map((c) => (
-              <CompetencyItem key={c.code} competency={c} />
+              <CompetencyItem key={c.code} competency={c} quizCompleted={profile.quizCompleted} />
             ))}
           </ul>
         </>
@@ -102,8 +109,10 @@ function ProfileMascot({ competencies, name }) {
   );
 }
 
-function CompetencyItem({ competency: c }) {
-  const origin = ORIGIN[c.origin] ?? ORIGIN.NO_DATA;
+function CompetencyItem({ competency: c, quizCompleted }) {
+  // Sem quiz feito, "Histórico" não pode dizer que o quiz deixou de contar (#89).
+  const key = c.origin === 'HISTORY' && !quizCompleted ? 'HISTORY_NO_QUIZ' : c.origin;
+  const origin = ORIGIN[key] ?? ORIGIN.NO_DATA;
   const noData = c.origin === 'NO_DATA' || c.level == null;
   const width = noData ? 0 : Math.max(0, Math.min(100, (c.level / 5) * 100));
 

@@ -104,4 +104,43 @@ describe('CompetencyProfile', () => {
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Estudante não encontrado.');
   });
+
+  describe('origin text when the profile comes only from grades (#89)', () => {
+    const historyOnly = (quizCompleted, completedCourseUnits) => ({
+      ...PROFILE,
+      completedCourseUnits,
+      quizCompleted,
+      quizWeight: 0,
+      competencies: [{
+        ...PROFILE.competencies[0],
+        level: 3.0,
+        origin: 'HISTORY',
+        quizWeight: 0,
+        quizLevel: null,
+        historyLevel: 3.0,
+      }],
+    });
+
+    it('says there is no quiz when the student never did it', async () => {
+      vi.spyOn(globalThis, 'fetch').mockResolvedValue(jsonResponse(200, historyOnly(false, 2)));
+      render(<CompetencyProfile studentId={7} />);
+
+      fireEvent.click(await screen.findByText('Programação'));
+
+      expect(screen.getByText('Vem só das notas, porque ainda não fizeste o quiz inicial.')).toBeInTheDocument();
+      expect(screen.queryByText(/o quiz já não conta/)).toBeNull();
+      expect(screen.getByText(/sem quiz feito, o perfil vem só das notas/)).toBeInTheDocument();
+      expect(screen.queryByText(/o quiz conta/)).toBeNull();
+    });
+
+    it('says the quiz no longer counts after 6+ UCs when the quiz was done', async () => {
+      vi.spyOn(globalThis, 'fetch').mockResolvedValue(jsonResponse(200, historyOnly(true, 6)));
+      render(<CompetencyProfile studentId={7} />);
+
+      fireEvent.click(await screen.findByText('Programação'));
+
+      expect(screen.getByText('Vem só das notas: o quiz já não conta para esta competência.')).toBeInTheDocument();
+      expect(screen.getByText(/o quiz conta/)).toHaveTextContent('6 UC(s) concluída(s) · o quiz conta 0% no perfil');
+    });
+  });
 });
