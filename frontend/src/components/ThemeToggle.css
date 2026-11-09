@@ -1,0 +1,97 @@
+/* Botão de modo noturno: um pequeno céu em pixel art com sol ou lua. */
+.theme-toggle {
+  position: fixed;
+  right: var(--s-4, 16px);
+  bottom: var(--s-4, 16px);
+  z-index: 50;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2, 8px);
+  padding: 4px 12px 4px 4px;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: var(--text-sm, 0.8125rem);
+  font-weight: 700;
+  box-shadow: 2px 2px 0 var(--ink);
+  transition: transform var(--t-fast, 120ms) var(--ease, ease), box-shadow var(--t-fast, 120ms);
+}
+
+.theme-toggle:hover:not(:disabled) {
+  border-color: var(--ink);
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.theme-toggle:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 var(--ink);
+}
+
+.theme-toggle-sky {
+  position: relative;
+  width: 44px;
+  height: 26px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: #d6e6ee;
+  transition: background var(--t, 180ms) var(--ease, ease);
+}
+
+.is-night .theme-toggle-sky {
+  background: #131a29;
+}
+
+/* Sol (dia) que desliza para a direita e vira lua (noite) */
+.theme-toggle-body {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #f2c14e;
+  box-shadow: inset -3px -3px 0 #d9a530;
+  transition: transform var(--t, 180ms) var(--ease, ease), background var(--t, 180ms), box-shadow var(--t, 180ms);
+}
+
+.is-night .theme-toggle-body {
+  transform: translateX(18px);
+  background: #ebe5d2;
+  box-shadow: inset -3px -3px 0 #c9c2ab, inset 4px 2px 0 -5px #c9c2ab;
+}
+
+/* Estrelas de 2px, só à noite */
+.theme-toggle-stars {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2px;
+  height: 2px;
+  opacity: 0;
+  box-shadow: 6px 6px #f1ede2, 12px 16px #f1ede2, 4px 19px #f1ede2, 15px 4px #f1ede2;
+  transition: opacity var(--t, 180ms);
+}
+
+.is-night .theme-toggle-stars {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-toggle,
+  .theme-toggle-sky,
+  .theme-toggle-body,
+  .theme-toggle-stars {
+    transition: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .theme-toggle-label {
+    display: none;
+  }
+  .theme-toggle {
+    padding: 4px;
+  }
+}

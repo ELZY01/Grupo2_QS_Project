@@ -90,27 +90,40 @@ export default function StudentHome({ studentId, onLogout }) {
               </div>
             </section>
 
-            <section className="sx-areas" aria-label="As tuas competências">
-              {Object.entries(AREAS).map(([code, area]) => {
-                const level = mascot.levels[code] ?? 1;
-                const next = level < 5 ? UNLOCKS[code][level + 1] : null;
-                return (
-                  <article key={code} className={`sx-card sx-area sx-area-${area.key}`}>
-                    <div className="sx-area-head">
-                      <h3>{area.label}</h3>
-                      <span className="sx-level">Nível {level}</span>
-                    </div>
-                    <div className="sx-dots" aria-label={`Nível ${level} de 5`}>
-                      {[1, 2, 3, 4, 5].map((n) => (
-                        <span key={n} className={n <= level ? 'on' : ''} />
-                      ))}
-                    </div>
-                    <p className="sx-muted sx-small">
-                      {next ? `No nível ${level + 1} o Pix ganha: ${next}.` : 'Nível máximo! Todos os acessórios desbloqueados.'}
-                    </p>
-                  </article>
-                );
-              })}
+            <section className="sx-card sx-areas" aria-labelledby="areas-title">
+              <div className="sx-areas-head">
+                <h2 id="areas-title">Competências</h2>
+                <p className="sx-muted sx-small">Cada nível acrescenta um acessório ao Pix.</p>
+              </div>
+              <ul className="sx-area-list">
+                {Object.entries(AREAS).map(([code, area]) => {
+                  const level = mascot.levels[code] ?? 1;
+                  const next = level < 5 ? UNLOCKS[code][level + 1] : null;
+                  return (
+                    <li key={code} className={`sx-area sx-area-${area.key}`}>
+                      <span className="sx-area-name">
+                        <span className="sx-area-swatch" aria-hidden="true" />
+                        {area.label}
+                      </span>
+                      <span className="sx-dots" role="img" aria-label={`Nível ${level} de 5`}>
+                        {[1, 2, 3, 4, 5].map((n) => (
+                          <span key={n} className={n <= level ? 'on' : ''} />
+                        ))}
+                      </span>
+                      <span className="sx-level mono">{level}/5</span>
+                      <span className="sx-area-next">
+                        {next ? (
+                          <>
+                            Nível {level + 1}: <strong>{next}</strong>
+                          </>
+                        ) : (
+                          'Todos os acessórios desbloqueados'
+                        )}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
             </section>
           </>
         )}

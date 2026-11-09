@@ -87,7 +87,7 @@ export default function AcademicHistory({ studentId, onChange, readOnly = false 
     <section className="record-card" aria-labelledby="history-title">
       <h3 id="history-title">Histórico académico</h3>
 
-      {loading && <p>A carregar o histórico…</p>}
+      {loading && <p className="loading">A carregar o histórico…</p>}
 
       {!loading && loadError && (
         <p className="record-error" role="alert">
