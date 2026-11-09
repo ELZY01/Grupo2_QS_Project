@@ -8,6 +8,7 @@ import com.studymatch.model.Role;
 import com.studymatch.model.Student;
 import com.studymatch.repository.AppUserRepository;
 import com.studymatch.repository.StudentRepository;
+import com.studymatch.security.LoginThrottle;
 import com.studymatch.security.TokenService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,7 +52,8 @@ class AuthServiceTest {
         students = mock(StudentRepository.class);
         studentService = mock(StudentService.class);
         tokens = new TokenService(Duration.ofHours(1));
-        service = new AuthService(users, students, studentService, encoder, tokens);
+        service = new AuthService(users, students, studentService, encoder, tokens,
+                new LoginThrottle(5, Duration.ofMinutes(15)));
         when(users.save(any(AppUser.class))).thenAnswer(inv -> withId(inv.getArgument(0), 99L));
     }
 
@@ -79,6 +81,34 @@ class AuthServiceTest {
 
         assertEquals(HttpStatus.UNAUTHORIZED, wrong.getStatusCode());
         assertEquals(wrong.getReason(), unknown.getReason());
+    }
+
+    @Test
+    void blocksTheUserAfter5FailedAttemptsEvenWithTheRightPassword() {
+        AppUser admin = withId(new AppUser("admin", encoder.encode("studymatch"), Role.ADMIN, "Administrador", null), 1L);
+        when(users.findByUsernameIgnoreCase("admin")).thenReturn(Optional.of(admin));
+
+        for (int i = 0; i < 5; i++) {
+            assertThrows(ResponseStatusException.class, () -> service.login(new LoginRequest("admin", "errada123")));
+        }
+        var blocked = assertThrows(ResponseStatusException.class,
+                () -> service.login(new LoginRequest("ADMIN", "studymatch")));
+
+        assertEquals(HttpStatus.TOO_MANY_REQUESTS, blocked.getStatusCode());
+    }
+
+    @Test
+    void aSuccessfulLoginResetsTheFailures() {
+        AppUser admin = withId(new AppUser("admin", encoder.encode("studymatch"), Role.ADMIN, "Administrador", null), 1L);
+        when(users.findByUsernameIgnoreCase("admin")).thenReturn(Optional.of(admin));
+
+        for (int i = 0; i < 4; i++) {
+            assertThrows(ResponseStatusException.class, () -> service.login(new LoginRequest("admin", "errada123")));
+        }
+        service.login(new LoginRequest("admin", "studymatch"));
+        assertThrows(ResponseStatusException.class, () -> service.login(new LoginRequest("admin", "errada123")));
+
+        assertEquals(Role.ADMIN, service.login(new LoginRequest("admin", "studymatch")).role());
     }
 
     @Test
