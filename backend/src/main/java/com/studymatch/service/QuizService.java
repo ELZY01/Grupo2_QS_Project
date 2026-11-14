@@ -11,8 +11,10 @@ import com.studymatch.repository.QuestionRepository;
 import com.studymatch.repository.QuizRepository;
 import com.studymatch.repository.QuizSubmissionRepository;
 import com.studymatch.repository.StudentRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -66,6 +68,10 @@ public class QuizService {
      */
     @Transactional(readOnly = true)
     public List<Question> getQuizQuestions(Long quizId) {
+        if (!quizRepository.existsById(quizId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Quiz não encontrado");
+        }
+
         List<Question> questions = questionRepository.findByQuizIdOrderByQuestionOrderAsc(quizId);
         // Força a inicialização da relação com o Quiz acedendo ao ID
         for (Question q : questions) {
@@ -87,21 +93,21 @@ public class QuizService {
     public QuizSubmission submitQuiz(Long studentId, Long quizId, QuizSubmissionRequest request) {
         // Valida se o request e a lista de respostas não são nulos
         if (request == null || request.getAnswers() == null) {
-            throw new IllegalArgumentException("O pedido de submissão não pode ser vazio.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O pedido de submissão não pode ser vazio.");
         }
 
         // Valida a restrição da issue: o quiz deve conter exatamente 20 respostas
         if (request.getAnswers().size() != 20) {
-            throw new IllegalArgumentException("O quiz de arranque a frio deve conter exatamente 20 respostas.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O quiz de arranque a frio deve conter exatamente 20 respostas.");
         }
 
         // Procura o estudante na base de dados
         Student student = studentRepository.findById(studentId)
-                .orElseThrow(() -> new RuntimeException("Estudante não encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Estudante não encontrado"));
 
         // Procura o quiz na base de dados
         Quiz quiz = quizRepository.findById(quizId)
-                .orElseThrow(() -> new RuntimeException("Quiz não encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Quiz não encontrado"));
 
         // Cria e guarda a submissão principal
         QuizSubmission submission = new QuizSubmission(student, quiz);
@@ -110,11 +116,17 @@ public class QuizService {
         // Processa e guarda cada uma das 20 respostas
         for (QuizSubmissionRequest.AnswerDto answerDto : request.getAnswers()) {
             Question question = questionRepository.findById(answerDto.getQuestionId())
-                    .orElseThrow(() -> new RuntimeException("Pergunta com ID " + answerDto.getQuestionId() + " não encontrada"));
+                    .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.BAD_REQUEST,
+                            "Pergunta com ID " + answerDto.getQuestionId() + " não encontrada"
+                    ));
 
-            // A própria entidade Answer valida se o valor está entre 1 e 5 no método setValue()
-            Answer answer = new Answer(savedSubmission, question, answerDto.getValue());
-            answerRepository.save(answer);
+            try {
+                Answer answer = new Answer(savedSubmission, question, answerDto.getValue());
+                answerRepository.save(answer);
+            } catch (IllegalArgumentException e) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+            }
         }
 
         return savedSubmission;
@@ -128,8 +140,15 @@ public class QuizService {
      */
     @Transactional(readOnly = true)
     public QuizSubmission getLatestSubmissionForStudent(Long studentId) {
+        if (!studentRepository.existsById(studentId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Estudante com ID " + studentId + " não encontrado");
+        }
+
         return quizSubmissionRepository.findTopByStudentIdOrderBySubmittedAtDesc(studentId)
-                .orElseThrow(() -> new RuntimeException("Nenhuma submissão encontrada para o estudante com ID " + studentId));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Nenhuma submissão encontrada para o estudante com ID " + studentId
+                ));
     }
 
     /**

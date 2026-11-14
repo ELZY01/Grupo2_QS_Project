@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -90,11 +91,12 @@ class QuizServiceTest {
         }
         request.setAnswers(answers);
 
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+        // Atualizado para esperar a ResponseStatusException e a mensagem formatada do Spring
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
             quizService.submitQuiz(studentId, quizId, request);
         });
 
-        assertEquals("O quiz de arranque a frio deve conter exatamente 20 respostas.", exception.getMessage());
+        assertEquals("400 BAD_REQUEST \"O quiz de arranque a frio deve conter exatamente 20 respostas.\"", exception.getMessage());
     }
 
     @Test
