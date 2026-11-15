@@ -3,6 +3,7 @@ import CourseUnitAssignments from './components/CourseUnitAssignments';
 import HealthStatus from './components/HealthStatus';
 import StudentManager from './components/StudentManager';
 import StudentRecords from './components/StudentRecords';
+import GroupContexts from './groups/GroupContexts.jsx';
 import AdminPix from './mascot/AdminPix.jsx';
 import './App.css';
 
@@ -10,10 +11,11 @@ const TABS = [
   { id: 'students', label: 'Estudantes', hint: 'Registar e editar estudantes' },
   { id: 'records', label: 'Cadeiras e notas', hint: 'Lançar as UCs e notas de cada estudante' },
   { id: 'classes', label: 'Docentes e turmas', hint: 'Associar docentes às UCs e inscrever os alunos que as frequentam' },
+  { id: 'groups', label: 'Grupos', hint: 'Criar contextos, gerar grupos e ver porque ficaram juntos' },
 ];
 
 /**
- * Área do administrador: gere estudantes e lança as cadeiras e notas.
+ * Área do administrador: gere estudantes, lança as cadeiras e notas e forma os grupos.
  * Não tem quiz: o Pix do administrador é a versão ultra rara.
  */
 export default function AdminApp({ onLogout }) {
@@ -66,6 +68,7 @@ export default function AdminApp({ onLogout }) {
         {tab === 'students' && <StudentManager />}
         {tab === 'records' && <StudentRecords />}
         {tab === 'classes' && <CourseUnitAssignments />}
+        {tab === 'groups' && <GroupContexts />}
       </main>
     </div>
   );

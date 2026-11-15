@@ -1,27 +1,146 @@
-/* Tokens de design do StudyMatch: usar sempre estas variáveis nos componentes. */
+/*
+ * Tokens de design do StudyMatch. Usar sempre estas variáveis nos componentes.
+ * Direção: caderno de estudante. Papel quente, tinta escura, um só acento
+ * (o verde do Pix). O pixel art é a única nota lúdica; a fonte mono ecoa-o
+ * nos números e etiquetas.
+ */
 :root {
-  --bg: #f3f5f2;
-  --surface: #ffffff;
-  --surface-2: #f7f9f6;
-  --ink: #1d2a23;
-  --muted: #5f6d65;
-  --line: #dde3dd;
-  --primary: #2f8a5b;
-  --primary-ink: #ffffff;
-  --primary-soft: #e3f3ea;
-  --danger: #c23a3a;
-  --danger-soft: #fdecec;
-  --success: #1f7a49;
-  --radius: 14px;
-  --radius-sm: 9px;
-  --shadow: 0 1px 2px rgba(29, 42, 35, 0.06), 0 6px 20px rgba(29, 42, 35, 0.05);
-  --font: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  /* Neutros (papel quente) */
+  --bg: #f5f3ee;
+  --surface: #fffdf8;
+  --surface-2: #efece4;
+  --surface-3: #e7e3d8;
+  --line: #e0dbcf;
+  --line-strong: #cbc4b4;
+  --ink: #1f1d19;
+  --ink-2: #45413a;
+  --muted: #706a5e;
 
+  /* Acento: o verde do Pix. Só para ações primárias e estados ativos. */
+  --primary: #2b7a4b;
+  --primary-hover: #236640;
+  --primary-ink: #ffffff;
+  --primary-soft: #e2efe5;
+  --primary-line: #b9d6c1;
+
+  /* Estados */
+  --danger: #b3372f;
+  --danger-soft: #f8e7e3;
+  --success: #2b7a4b;
+  --success-soft: #e2efe5;
+  --info: #35618f;
+  --info-soft: #e3eaf3;
+  --warn: #8a5a0b;
+  --warn-soft: #f6ecd6;
+
+  /* Cores das áreas (vêm da folha de design do Pix: são dados, não acentos) */
+  --area-org: #5d8fd6;
+  --area-tempo: #d9a93a;
+  --area-prog: #4fae84;
+  --area-equipa: #d46ea4;
+
+  /* Tipografia: escala 12 / 13 / 15 / 18 / 24 / 36 */
+  --font: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-md: 0.9375rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.5rem;
+  --text-2xl: 2.25rem;
+
+  /* Espaçamento (grelha de 4px) */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-8: 32px;
+  --s-10: 40px;
+  --s-12: 48px;
+  --s-16: 64px;
+
+  /* Raios e elevação: bordas antes de sombras */
+  --radius-sm: 6px;
+  --radius: 8px;
+  --radius-lg: 10px;
+  --shadow-float: 0 1px 2px rgba(31, 29, 25, 0.06), 0 8px 24px rgba(31, 29, 25, 0.08);
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --t-fast: 120ms;
+  --t: 180ms;
+
+  color-scheme: light;
   font-family: var(--font);
+  font-size: 100%;
   line-height: 1.5;
   color: var(--ink);
   background-color: var(--bg);
   -webkit-font-smoothing: antialiased;
+  font-feature-settings: 'ss01';
+}
+
+/* Modo noturno: segue o sistema, a não ser que a pessoa escolha no botão (data-theme). */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #171613;
+    --surface: #1f1d1a;
+    --surface-2: #272521;
+    --surface-3: #312e29;
+    --line: #34312b;
+    --line-strong: #48443c;
+    --ink: #eeebe3;
+    --ink-2: #cfcbc1;
+    --muted: #9a9487;
+
+    --primary: #55b07a;
+    --primary-hover: #6cc08f;
+    --primary-ink: #0f1d14;
+    --primary-soft: #1f3327;
+    --primary-line: #2f5039;
+
+    --danger: #e57b70;
+    --danger-soft: #3a211d;
+    --success: #6cc08f;
+    --success-soft: #1f3327;
+    --info: #8fb2dc;
+    --info-soft: #1f2a37;
+    --warn: #e0b45e;
+    --warn-soft: #362c18;
+
+    --shadow-float: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --bg: #171613;
+  --surface: #1f1d1a;
+  --surface-2: #272521;
+  --surface-3: #312e29;
+  --line: #34312b;
+  --line-strong: #48443c;
+  --ink: #eeebe3;
+  --ink-2: #cfcbc1;
+  --muted: #9a9487;
+
+  --primary: #55b07a;
+  --primary-hover: #6cc08f;
+  --primary-ink: #0f1d14;
+  --primary-soft: #1f3327;
+  --primary-line: #2f5039;
+
+  --danger: #e57b70;
+  --danger-soft: #3a211d;
+  --success: #6cc08f;
+  --success-soft: #1f3327;
+  --info: #8fb2dc;
+  --info-soft: #1f2a37;
+  --warn: #e0b45e;
+  --warn-soft: #362c18;
+
+  --shadow-float: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
+  color-scheme: dark;
 }
 
 * {
@@ -31,6 +150,7 @@
 body {
   margin: 0;
   background: var(--bg);
+  font-size: var(--text-md);
 }
 
 h1,
@@ -39,35 +159,47 @@ h3,
 h4 {
   line-height: 1.2;
   margin: 0;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
+p {
+  margin: 0;
+}
+
+/* Botões: secundário por omissão, primário com .btn-primary ou type=submit */
 button {
   font: inherit;
-  font-weight: 600;
-  font-size: 0.92rem;
-  padding: 9px 16px;
-  border: 1px solid var(--line);
+  font-weight: 500;
+  font-size: var(--text-sm);
+  line-height: 20px;
+  padding: 7px 14px;
+  border: 1px solid var(--line-strong);
   border-radius: var(--radius-sm);
   background: var(--surface);
   color: var(--ink);
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
+  transition:
+    background-color var(--t-fast) var(--ease),
+    border-color var(--t-fast) var(--ease),
+    color var(--t-fast) var(--ease);
 }
 
 button:hover:not(:disabled) {
-  border-color: var(--primary);
+  background: var(--surface-2);
+}
+
+button:active:not(:disabled) {
+  background: var(--surface-3);
 }
 
 button:disabled {
-  cursor: default;
-  opacity: 0.55;
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
-button:focus-visible,
-input:focus-visible,
-select:focus-visible,
-summary:focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--primary) 45%, transparent);
+:focus-visible {
+  outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
 
@@ -80,36 +212,137 @@ button[type='submit'] {
 
 .btn-primary:hover:not(:disabled),
 button[type='submit']:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--primary) 88%, black);
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
 }
 
+.btn-primary:active:not(:disabled),
+button[type='submit']:active:not(:disabled) {
+  background: var(--primary-hover);
+}
+
+/* Campos */
 input,
 select {
   font: inherit;
-  font-size: 0.95rem;
-  padding: 9px 11px;
-  border: 1px solid var(--line);
+  font-size: var(--text-md);
+  height: 38px;
+  padding: 0 var(--s-3);
+  border: 1px solid var(--line-strong);
   border-radius: var(--radius-sm);
   background: var(--surface);
   color: var(--ink);
   width: 100%;
+  transition: border-color var(--t-fast) var(--ease);
 }
 
-input:disabled {
+input:hover:not(:disabled),
+select:hover:not(:disabled) {
+  border-color: var(--muted);
+}
+
+input:focus-visible,
+select:focus-visible {
+  outline: 0;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-soft);
+}
+
+input::placeholder {
+  color: var(--muted);
+}
+
+input:disabled,
+select:disabled {
   background: var(--surface-2);
   color: var(--muted);
+  cursor: not-allowed;
+}
+
+/* Etiqueta de campo, partilhada pelos formulários */
+.field {
+  display: grid;
+  gap: var(--s-1);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--ink-2);
 }
 
 .card {
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 22px;
+  border-radius: var(--radius-lg);
+  padding: var(--s-6);
 }
 
 .actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--s-2);
+}
+
+/* Mensagens de estado, partilhadas por todas as áreas */
+.notice {
+  margin: 0;
+  padding: var(--s-2) var(--s-3);
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  font-size: var(--text-sm);
+}
+
+.notice-error {
+  background: var(--danger-soft);
+  border-color: color-mix(in srgb, var(--danger) 25%, transparent);
+  color: var(--danger);
+}
+
+.notice-success {
+  background: var(--success-soft);
+  border-color: var(--primary-line);
+  color: var(--success);
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Linha de carregamento discreta */
+.loading {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+
+.loading::before {
+  content: '';
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--line-strong);
+  border-top-color: var(--primary);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .loading::before {
+    animation: spin 0.8s linear infinite;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }

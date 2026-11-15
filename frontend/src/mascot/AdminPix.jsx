@@ -5,6 +5,7 @@ const TIPS = {
   students: 'Bem-vindo, admin! Aqui geres os estudantes. Eles próprios fazem o quiz quando entram.',
   records: 'Lança as cadeiras e as notas de cada estudante. O Pix deles evolui com isto!',
   classes: 'Escolhe uma UC, associa o docente e inscreve os alunos. O docente só vê estes alunos!',
+  groups: 'Escolhe os alunos e gera os grupos. Cada grupo fica com alguém forte em cada área!',
 };
 
 /**
@@ -16,7 +17,7 @@ export default function AdminPix({ tab }) {
       <p className="mascot-bubble">{TIPS[tab]}</p>
       <div className="admin-pix-art">
         <Mascot src={ADMIN_SPRITE} alt="Pix Admin, versão ultra rara" size={96} />
-        <p className="admin-badge">★ Ultra raro · Pix Admin</p>
+        <p className="admin-badge mono">Pix Admin · ultra raro</p>
       </div>
     </aside>
   );

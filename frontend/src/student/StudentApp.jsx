@@ -39,7 +39,7 @@ export default function StudentApp({ studentId, startWithQuiz = false, onLogout 
               </button>
             </div>
           ) : (
-            <p className="sx-muted">A acordar o Pix…</p>
+            <p className="loading">A acordar o Pix…</p>
           )}
         </main>
       )}

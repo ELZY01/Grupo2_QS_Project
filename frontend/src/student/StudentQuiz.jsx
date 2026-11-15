@@ -73,7 +73,7 @@ export default function StudentQuiz({ studentId, onDone }) {
   if (loading) {
     return (
       <main className="sx-center">
-        <p className="sx-muted">A preparar o quiz…</p>
+        <p className="loading">A preparar o quiz…</p>
       </main>
     );
   }
@@ -114,10 +114,12 @@ export default function StudentQuiz({ studentId, onDone }) {
         </div>
 
         <div className="sx-card sx-question">
-          <p className="sx-chip">{question.competency?.name ?? 'Geral'}</p>
-          <p className="sx-qcount">
-            Pergunta {index + 1} de {total}
-          </p>
+          <div className="sx-question-meta">
+            <p className="sx-qcount" aria-label={`Pergunta ${index + 1} de ${total}`}>
+              {String(index + 1).padStart(2, '0')}/{String(total).padStart(2, '0')}
+            </p>
+            <p className="sx-chip">{question.competency?.name ?? 'Geral'}</p>
+          </div>
           <h2>{question.text}</h2>
 
           <div className="sx-scale" role="radiogroup" aria-label={question.text}>

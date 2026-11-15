@@ -1,7 +1,7 @@
-/* Layout: barra lateral fixa (marca, navegação, mascote, estado) + área de conteúdo. */
+/* Área do administrador: barra lateral fixa (marca, navegação, mascote, estado) + conteúdo denso. */
 .app-shell {
   display: grid;
-  grid-template-columns: 270px minmax(0, 1fr);
+  grid-template-columns: 248px minmax(0, 1fr);
   min-height: 100vh;
 }
 
@@ -9,10 +9,12 @@
   position: sticky;
   top: 0;
   height: 100vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  padding: 24px 18px;
+  gap: var(--s-6);
+  padding: var(--s-4) var(--s-3);
   background: var(--surface);
   border-right: 1px solid var(--line);
 }
@@ -20,56 +22,61 @@
 .app-brand {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--s-3);
+  padding: 0 var(--s-2);
+  height: 40px;
 }
 
+/* Logótipo: um bloco de píxeis verde, a mesma linguagem do Pix */
 .app-logo {
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 11px;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
   background: var(--primary);
   color: var(--primary-ink);
-  font-weight: 800;
-  letter-spacing: 0.02em;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: var(--text-xs);
 }
 
 .app-name {
-  margin: 0;
-  font-weight: 800;
-  font-size: 1.1rem;
+  font-weight: 600;
+  font-size: var(--text-md);
+  line-height: 1.2;
 }
 
 .app-tagline {
-  margin: 0;
-  font-size: 0.78rem;
+  font-size: var(--text-xs);
   color: var(--muted);
 }
 
 .app-nav {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
 .app-nav button {
   text-align: left;
   border-color: transparent;
   background: transparent;
-  color: var(--muted);
+  color: var(--ink-2);
+  padding: 6px var(--s-2);
 }
 
 .app-nav button:hover:not(:disabled) {
   background: var(--surface-2);
-  border-color: transparent;
   color: var(--ink);
 }
 
 .app-nav button.active,
 .app-nav button.active:hover:not(:disabled) {
-  background: var(--primary-soft);
-  color: var(--primary);
+  background: var(--surface-2);
+  color: var(--ink);
+  font-weight: 600;
+  box-shadow: inset 2px 0 0 var(--primary);
 }
 
 .app-status {
@@ -77,21 +84,27 @@
 }
 
 .app-main {
-  padding: 32px clamp(16px, 4vw, 48px) 56px;
+  padding: var(--s-8) clamp(var(--s-4), 4vw, var(--s-12)) var(--s-16);
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--s-6);
   min-width: 0;
 }
 
+.page-header {
+  padding-bottom: var(--s-5);
+  border-bottom: 1px solid var(--line);
+}
+
 .page-header h1 {
-  font-size: 1.75rem;
-  font-weight: 800;
+  font-size: var(--text-xl);
+  letter-spacing: -0.02em;
 }
 
 .page-header p {
-  margin: 6px 0 0;
+  margin-top: var(--s-1);
   color: var(--muted);
+  font-size: var(--text-sm);
 }
 
 /* O título já está no cabeçalho da página. */
@@ -101,43 +114,76 @@
 }
 
 .quiz-done h2 {
-  margin-bottom: 8px;
+  margin-bottom: var(--s-2);
 }
 
 .quiz-done p {
   color: var(--muted);
-  margin: 0 0 16px;
+  margin: 0 0 var(--s-4);
 }
 
-/* Mascote como guia (tutorial) */
+/* Mascote como guia */
 .mascot-guide {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: var(--s-3);
+  padding: var(--s-4) var(--s-3) var(--s-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg);
 }
 
 .mascot-bubble {
   position: relative;
-  margin: 0;
-  padding: 12px 14px;
-  border-radius: 12px;
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-  font-size: 0.85rem;
+  padding: var(--s-2) var(--s-3);
+  border-radius: 4px;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  font-size: var(--text-sm);
+  color: var(--ink-2);
+  line-height: 1.45;
 }
 
 .mascot-bubble::after {
   content: '';
   position: absolute;
   left: 50%;
-  bottom: -7px;
-  width: 12px;
-  height: 12px;
-  background: var(--surface-2);
-  border-right: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
+  bottom: -6px;
+  width: 10px;
+  height: 10px;
+  background: var(--surface);
+  border-right: 1px solid var(--line-strong);
+  border-bottom: 1px solid var(--line-strong);
   transform: translateX(-50%) rotate(45deg);
+}
+
+.admin-pix-art {
+  display: grid;
+  justify-items: center;
+  gap: var(--s-2);
+  flex: none;
+}
+
+.admin-badge {
+  white-space: nowrap;
+  padding: 2px var(--s-2);
+  border-radius: 4px;
+  background: var(--ink);
+  color: var(--surface);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: var(--s-4);
+}
+
+.admin-logout {
+  flex: none;
 }
 
 @media (max-width: 860px) {
@@ -150,7 +196,7 @@
     height: auto;
     border-right: 0;
     border-bottom: 1px solid var(--line);
-    gap: 16px;
+    gap: var(--s-3);
   }
 
   .app-nav {
@@ -158,9 +204,15 @@
     flex-wrap: wrap;
   }
 
+  .app-nav button.active,
+  .app-nav button.active:hover:not(:disabled) {
+    box-shadow: inset 0 -2px 0 var(--primary);
+  }
+
   .mascot-guide {
     flex-direction: row-reverse;
     justify-content: flex-end;
+    align-items: center;
   }
 
   .mascot-bubble::after {
@@ -170,35 +222,8 @@
   .app-status {
     margin-top: 0;
   }
-}
 
-
-.admin-pix-art {
-  display: grid;
-  justify-items: center;
-  gap: 6px;
-  flex: none;
-}
-
-.admin-badge {
-  white-space: nowrap;
-  margin: 0;
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #7b4bd1, #c48a1c);
-  color: #fff;
-  font-size: 0.75rem;
-  font-weight: 800;
-  letter-spacing: 0.02em;
-}
-
-.admin-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 16px;
-}
-
-.admin-logout {
-  flex: none;
+  .app-main {
+    padding-top: var(--s-6);
+  }
 }

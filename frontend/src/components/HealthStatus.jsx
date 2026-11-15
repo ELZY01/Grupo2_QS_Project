@@ -46,7 +46,7 @@ export default function HealthStatus() {
     <section className="health-card" aria-live="polite">
       <h2>Estado do sistema</h2>
 
-      {loading && <p>A verificar o backend...</p>}
+      {loading && <p className="loading">A verificar o backend…</p>}
 
       {!loading && data && (
         <dl className="health-details">

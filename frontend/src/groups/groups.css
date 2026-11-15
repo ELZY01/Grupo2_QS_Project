@@ -1,0 +1,220 @@
+/* #74: contextos e grupos do administrador */
+.group-contexts {
+  display: grid;
+  gap: 20px;
+}
+
+.group-layout {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  align-items: start;
+}
+
+.group-contexts h2 {
+  margin: 0 0 12px;
+  font-size: 1.1rem;
+}
+
+.group-form {
+  display: grid;
+  gap: 14px;
+}
+
+.group-form label {
+  display: grid;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.group-students {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  max-height: 260px;
+  overflow-y: auto;
+  display: grid;
+  gap: 4px;
+}
+
+.group-students legend {
+  padding: 0 4px;
+  font-weight: 600;
+}
+
+.group-form .group-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 400;
+}
+
+.group-form .group-check input {
+  width: auto;
+  flex: none;
+  margin: 0;
+}
+
+.group-form .group-check-all {
+  font-weight: 600;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--line);
+}
+
+.group-number {
+  color: var(--muted);
+  font-size: 0.85em;
+  margin-left: auto;
+}
+
+.group-plan {
+  margin: 0;
+  color: var(--muted);
+}
+
+.group-plan.warn,
+.group-balance.warn {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.group-error {
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.group-history ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.group-history button {
+  width: 100%;
+  display: grid;
+  gap: 2px;
+  text-align: left;
+}
+
+.group-history button.active {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.group-history-name {
+  font-weight: 600;
+}
+
+.group-history-meta {
+  font-size: 0.85em;
+  color: var(--muted);
+}
+
+.group-current {
+  display: grid;
+  gap: 14px;
+}
+
+.group-current-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.group-current-header p,
+.group-method,
+.group-balance {
+  margin: 0;
+  color: var(--muted);
+}
+
+.group-results {
+  display: grid;
+  gap: 12px;
+}
+
+.group-balance.ok strong {
+  color: var(--success);
+}
+
+.group-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px;
+}
+
+.group-card {
+  padding: 16px;
+  display: grid;
+  gap: 8px;
+  align-content: start;
+}
+
+.group-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.group-card h3 {
+  margin: 0;
+}
+
+.group-card h4 {
+  margin: 6px 0 0;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+}
+
+.group-average {
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.group-gap {
+  margin: 0;
+  font-size: 0.9em;
+  color: var(--muted);
+}
+
+.group-members,
+.group-strongest {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.group-members li {
+  display: flex;
+}
+
+.group-area-org    { --area: #6f9fe0; }
+.group-area-tempo  { --area: #e8be55; }
+.group-area-prog   { --area: #6cc29a; }
+.group-area-equipa { --area: #df7fb2; }
+
+.group-area {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding-left: 8px;
+  border-left: 4px solid var(--area);
+  font-size: 0.9em;
+}
+
+.group-area-label {
+  color: var(--muted);
+}
