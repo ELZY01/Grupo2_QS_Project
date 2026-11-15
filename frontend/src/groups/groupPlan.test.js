@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { describePlan, formatDecimal, formatGap, planGroups } from './groupPlan.js';
+import { describePlan, formatDecimal, formatGap, groupOf, planGroups, swapError } from './groupPlan.js';
 
 describe('planGroups', () => {
   it('rejects the impossible configurations', () => {
@@ -39,5 +39,33 @@ describe('formatting', () => {
     expect(formatGap(0.24)).toBe('+0,2');
     expect(formatGap(-0.1)).toBe('−0,1');
     expect(formatGap(0.01)).toBe('0,0');
+  });
+});
+
+describe('swapError (#75)', () => {
+  const groups = [
+    { number: 1, members: [{ studentId: 1 }, { studentId: 2 }] },
+    { number: 2, members: [{ studentId: 3 }, { studentId: 4 }] },
+  ];
+
+  it('finds the group of a student', () => {
+    expect(groupOf(groups, 3)).toBe(2);
+    expect(groupOf(groups, 99)).toBeNull();
+  });
+
+  it('accepts two students from different groups', () => {
+    expect(swapError(groups, 1, 3)).toBeNull();
+  });
+
+  it('asks for both students', () => {
+    expect(swapError(groups, 1, null)).toBe('Escolhe os dois alunos a trocar.');
+  });
+
+  it('rejects two students from the same group', () => {
+    expect(swapError(groups, 1, 2)).toBe('Escolhe alunos de grupos diferentes.');
+  });
+
+  it('rejects a student that is not in any group', () => {
+    expect(swapError(groups, 1, 99)).toBe('Aluno não encontrado nos grupos.');
   });
 });

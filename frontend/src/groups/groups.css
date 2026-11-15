@@ -218,3 +218,23 @@
 .group-area-label {
   color: var(--muted);
 }
+
+/* Ajuste manual (#75) */
+.group-swap {
+  margin-top: 1.5rem;
+}
+
+.group-swap-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-end;
+}
+
+.group-swap-fields label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 12rem;
+  flex: 1;
+}

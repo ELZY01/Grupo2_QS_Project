@@ -9,6 +9,7 @@ vi.mock('../api/groupApi', () => ({
   getGroupContexts: vi.fn(),
   generateGroups: vi.fn(),
   getGroups: vi.fn(),
+  swapStudents: vi.fn(),
 }));
 vi.mock('../api/studentApi', () => ({ getStudents: vi.fn() }));
 
@@ -178,5 +179,73 @@ describe('GroupResults', () => {
     };
     render(<GroupResults generation={unbalanced} />);
     expect(screen.getByText(/acima do limite/)).toBeInTheDocument();
+  });
+});
+
+describe('manual swap (#75)', () => {
+  const openGeneration = async () => {
+    groupApi.getGroupContexts.mockResolvedValue([
+      { id: 7, name: 'Projeto final', studentCount: 8, generatedAt: '2026-11-08T10:00:00Z' },
+    ]);
+    groupApi.getGroups.mockResolvedValue(GENERATION);
+    render(<GroupContexts />);
+    fireEvent.click(await screen.findByRole('button', { name: /Projeto final/ }));
+    await screen.findByRole('article', { name: 'Grupo 1' });
+  };
+
+  const choose = (first, second) => {
+    const form = screen.getByRole('form', { name: 'Trocar alunos' });
+    fireEvent.change(within(form).getByLabelText('Aluno'), { target: { value: String(first) } });
+    fireEvent.change(within(form).getByLabelText('Trocar com'), { target: { value: String(second) } });
+    fireEvent.click(within(form).getByRole('button', { name: 'Trocar' }));
+  };
+
+  it('swaps two students and shows the recalculated averages', async () => {
+    const swapped = {
+      ...GENERATION,
+      groups: [
+        { ...GENERATION.groups[0], average: 3.4, members: [member(2), member(4), member(5), member(8)] },
+        { ...GENERATION.groups[1], average: 3.4, members: [member(1), member(3), member(6), member(7)] },
+      ],
+    };
+    groupApi.swapStudents.mockResolvedValue(swapped);
+    await openGeneration();
+
+    choose(1, 2);
+
+    await waitFor(() => expect(groupApi.swapStudents).toHaveBeenCalledWith(7, 1, 2));
+    const g2 = await screen.findByRole('article', { name: 'Grupo 2' });
+    expect(within(g2).getByText(/Aluno 1/)).toBeInTheDocument();
+    expect(within(g2).getByText('média 3,4 / 5')).toBeInTheDocument();
+  });
+
+  it('does not call the API when both students are in the same group', async () => {
+    await openGeneration();
+
+    choose(1, 4);
+
+    expect(await screen.findByText('Escolhe alunos de grupos diferentes.')).toBeInTheDocument();
+    expect(groupApi.swapStudents).not.toHaveBeenCalled();
+  });
+
+  it('warns when the swap leaves the groups more than 0,5 apart', async () => {
+    groupApi.swapStudents.mockResolvedValue({
+      ...GENERATION,
+      groups: [{ ...GENERATION.groups[0], average: 4.0 }, { ...GENERATION.groups[1], average: 3.2 }],
+    });
+    await openGeneration();
+
+    choose(1, 2);
+
+    expect(await screen.findByText(/acima do limite/)).toHaveAttribute('role', 'alert');
+  });
+
+  it('shows the API error when the swap is rejected', async () => {
+    groupApi.swapStudents.mockRejectedValue(new HttpError(409, 'Esses alunos já estão no mesmo grupo.'));
+    await openGeneration();
+
+    choose(1, 2);
+
+    expect(await screen.findByText('Esses alunos já estão no mesmo grupo.')).toBeInTheDocument();
   });
 });

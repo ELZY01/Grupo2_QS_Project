@@ -57,3 +57,21 @@ export function generateGroups(contextId) {
 export function getGroups(contextId) {
   return request(`/group-contexts/${contextId}/groups`, {}, ERRORS);
 }
+
+/**
+ * POST /api/group-contexts/{id}/swap (#75)
+ * Troca dois alunos de grupos diferentes e devolve a geração com as médias recalculadas.
+ * Proposta de contrato, a confirmar com o backend do #69:
+ *   pedido   { studentIdA, studentIdB }
+ *   resposta GroupGeneration (mesmo formato de /groups)
+ *
+ * @param {number} contextId identificador do contexto
+ * @param {number} studentIdA aluno de um grupo
+ * @param {number} studentIdB aluno de outro grupo
+ */
+export function swapStudents(contextId, studentIdA, studentIdB) {
+  return request(`/group-contexts/${contextId}/swap`, json('POST', { studentIdA, studentIdB }), {
+    ...ERRORS,
+    409: 'Esses alunos já estão no mesmo grupo.',
+  });
+}
