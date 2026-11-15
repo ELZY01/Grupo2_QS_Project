@@ -63,7 +63,7 @@ export default function StudentHome({ studentId, onLogout }) {
         </button>
       </header>
 
-      <main className="sx-page">
+      <main className="sx-page view-enter" key={tab}>
         {error && (
           <p className="sx-error" role="alert">
             Não foi possível carregar o teu perfil ({error}).
@@ -96,18 +96,18 @@ export default function StudentHome({ studentId, onLogout }) {
                 <p className="sx-muted sx-small">Cada nível acrescenta um acessório ao Pix.</p>
               </div>
               <ul className="sx-area-list">
-                {Object.entries(AREAS).map(([code, area]) => {
+                {Object.entries(AREAS).map(([code, area], row) => {
                   const level = mascot.levels[code] ?? 1;
                   const next = level < 5 ? UNLOCKS[code][level + 1] : null;
                   return (
-                    <li key={code} className={`sx-area sx-area-${area.key}`}>
+                    <li key={code} className={`sx-area sx-area-${area.key}`} style={{ '--row': row }}>
                       <span className="sx-area-name">
                         <span className="sx-area-swatch" aria-hidden="true" />
                         {area.label}
                       </span>
                       <span className="sx-dots" role="img" aria-label={`Nível ${level} de 5`}>
                         {[1, 2, 3, 4, 5].map((n) => (
-                          <span key={n} className={n <= level ? 'on' : ''} />
+                          <span key={n} className={n <= level ? 'on' : ''} style={{ '--n': n }} />
                         ))}
                       </span>
                       <span className="sx-level mono">{level}/5</span>

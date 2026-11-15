@@ -289,7 +289,7 @@
 }
 
 .sx-quiz-progress {
-  height: 2px;
+  height: 3px;
   background: var(--line);
 }
 
@@ -297,7 +297,7 @@
   display: block;
   height: 100%;
   background: var(--primary);
-  transition: width var(--t) var(--ease);
+  transition: width var(--t-slow) var(--ease-smooth);
 }
 
 .sx-quiz-body {
@@ -321,6 +321,13 @@
   display: grid;
   gap: var(--s-4);
   padding: var(--s-8);
+  overflow: hidden;
+}
+
+/* Conteúdo da pergunta: muda a cada pergunta e entra do lado para onde se andou. */
+.sx-question-content {
+  display: grid;
+  gap: var(--s-4);
 }
 
 .sx-question h2 {
@@ -387,6 +394,7 @@
 
 .sx-scale button.selected,
 .sx-scale button.selected:hover:not(:disabled) {
+  animation: pick var(--t) var(--ease-snap);
   border-color: var(--primary);
   background: var(--primary-soft);
   box-shadow: inset 0 0 0 1px var(--primary);
@@ -599,6 +607,10 @@
 
 .sx-dots span.on {
   background: var(--area);
+  /* Os pontos enchem-se pela ordem do nível, área a área: mostra que o nível é uma contagem. */
+  transform-origin: left;
+  animation: grow-x var(--t-slow) var(--ease-out) backwards;
+  animation-delay: calc(var(--row, 0) * 80ms + var(--n, 1) * var(--stagger));
 }
 
 @media (max-width: 860px) {

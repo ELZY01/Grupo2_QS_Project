@@ -66,9 +66,24 @@
   --radius: 8px;
   --radius-lg: 10px;
   --shadow-float: 0 1px 2px rgba(31, 29, 25, 0.06), 0 8px 24px rgba(31, 29, 25, 0.08);
+  /*
+   * Motion. Regra: o movimento explica, não decora. Cada animação mostra
+   * de onde algo vem, para onde vai ou que uma ação ficou registada.
+   * Easings com nome, como numa bíblia de motion:
+   *   ease    → estados de controlos (hover, foco)
+   *   smooth  → algo que muda de valor no ecrã (barras, progresso)
+   *   out     → entradas (o elemento chega depressa e assenta devagar)
+   *   snap    → confirmação de uma escolha (ligeiro ressalto)
+   */
   --ease: cubic-bezier(0.2, 0, 0, 1);
+  --ease-smooth: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-snap: cubic-bezier(0.34, 1.56, 0.64, 1);
   --t-fast: 120ms;
   --t: 180ms;
+  --t-slow: 280ms;
+  --t-enter: 360ms;
+  --stagger: 50ms;
 
   color-scheme: light;
   font-family: var(--font);
@@ -335,6 +350,75 @@ select:disabled {
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+/*
+ * Entradas partilhadas.
+ * .view-enter: o conteúdo de um separador acabou de mudar (uma só animação
+ * por ecrã, nunca em cada elemento).
+ * .enter-next / .enter-prev: o conteúdo chega do lado para onde se andou.
+ */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@keyframes slide-from-right {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+}
+
+@keyframes slide-from-left {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+}
+
+@keyframes grow-x {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes pick {
+  0% {
+    transform: scale(0.94);
+  }
+}
+
+.view-enter {
+  animation: rise-in var(--t-enter) var(--ease-out);
+}
+
+.enter-next {
+  animation: slide-from-right var(--t-enter) var(--ease-out);
+}
+
+.enter-prev {
+  animation: slide-from-left var(--t-enter) var(--ease-out);
+}
+
+/* Mensagens que aparecem depois de uma ação: chegam, não "piscam". */
+.notice,
+[role='alert'] {
+  animation: rise-in var(--t) var(--ease-out);
+}
+
+/* Quem pede menos movimento vê o estado final de imediato. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
   }
 }
 

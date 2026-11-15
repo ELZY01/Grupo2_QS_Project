@@ -65,10 +65,12 @@ export default function AdminApp({ onLogout }) {
           </button>
         </header>
 
-        {tab === 'students' && <StudentManager />}
-        {tab === 'records' && <StudentRecords />}
-        {tab === 'classes' && <CourseUnitAssignments />}
-        {tab === 'groups' && <GroupContexts />}
+        <div key={tab} className="view-enter">
+          {tab === 'students' && <StudentManager />}
+          {tab === 'records' && <StudentRecords />}
+          {tab === 'classes' && <CourseUnitAssignments />}
+          {tab === 'groups' && <GroupContexts />}
+        </div>
       </main>
     </div>
   );

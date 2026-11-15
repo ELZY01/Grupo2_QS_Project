@@ -284,7 +284,14 @@
   display: block;
   height: 100%;
   background: var(--primary);
+  /* A barra cresce do zero até ao nível: lê-se como um valor, não como um bloco. */
+  transform-origin: left;
+  animation: grow-x var(--t-enter) var(--ease-smooth) backwards;
 }
+
+.competency:nth-child(2) .competency-bar span { animation-delay: calc(1 * var(--stagger)); }
+.competency:nth-child(3) .competency-bar span { animation-delay: calc(2 * var(--stagger)); }
+.competency:nth-child(4) .competency-bar span { animation-delay: calc(3 * var(--stagger)); }
 
 .competency .origin {
   justify-self: end;
