@@ -1,6 +1,6 @@
 # Modelo de Casos de Uso — StudyMatch
 
-> Sprint 1 · Issue #4 · Grupo 2 — atualizado no Sprint 2 (Issue #51: UC06/RN13 e novo UC16)
+> Sprint 1 · Issue #4 · Grupo 2 — atualizado no Sprint 2 (Issue #51: UC06/RN13 e novo UC16) e no Sprint 3 (Issue #73: UC10/UC11, RN21 e RN23, ver ADR-003)
 > Documento vivo: os casos de uso vão evoluir nos próximos sprints.
 
 ## 1. Objetivo
@@ -323,20 +323,20 @@ flowchart LR
 
 **Cenário principal**
 1. O docente escolhe a UC.
-2. Indica o nome da atividade (ex.: "Projeto final") e o tamanho do grupo.
+2. Indica o nome da atividade (ex.: "Projeto final"). O tamanho dos grupos não se escolhe: são sempre de 4 ou 5 alunos (RN21).
 3. Seleciona os alunos participantes (por omissão, todos os inscritos na UC no ano letivo atual).
 4. O sistema valida e guarda o contexto.
 
 **Fluxos alternativos / exceções**
-- **4a.** O nº de alunos não é múltiplo do tamanho → aviso: indica quantos grupos ficam com um elemento a mais ou a menos e deixa continuar.
-- **4b.** Tamanho do grupo < 2 ou maior que o nº de alunos → rejeitado.
+- **4a.** O sistema mostra a divisão que vai usar (ex.: 23 alunos → 5 + 5 + 5 + 4 + 4).
+- **4b.** Não há divisão em grupos de 4 ou 5 (1, 2, 3, 6, 7 ou 11 alunos) → rejeitado com mensagem clara.
 - **3a.** Alunos importados por CSV (UC14).
 
 **Regras de negócio**
-- RN21: nº de grupos = `ceil(nAlunos / tamanho)`. O resto distribui-se para os grupos ficarem com tamanhos que diferem no máximo em 1.
+- RN21: grupos de **4 ou 5 alunos**. Nº de grupos = `⌈nAlunos / 5⌉`; há solução se `4 × nGrupos ≤ nAlunos`; ficam `nAlunos − 4 × nGrupos` grupos de 5 e os restantes de 4. *(Sprint 3: substitui o tamanho escolhido pelo docente; ver ADR-003, D1.)*
 - RN22: cada contexto pertence a uma UC e a um docente.
 
-**Conceitos de domínio:** Contexto de agrupamento, Atividade, Tamanho do grupo, Participante.
+**Conceitos de domínio:** Contexto de agrupamento, Atividade, Participante.
 
 ---
 
@@ -350,17 +350,18 @@ flowchart LR
 2. O sistema obtém a média do perfil de cada aluno participante.
 3. Ordena os alunos por média, por ordem decrescente.
 4. Distribui-os em **serpentina** (*snake draft*): G1, G2, …, Gk, Gk, …, G2, G1, G1, G2, …
-5. Calcula e mostra a média de cada grupo e a diferença entre a maior e a menor.
-6. O docente confirma e os grupos ficam guardados.
+5. Faz trocas entre grupos para cada grupo ter alguém forte (nível ≥ 3,5) em cada área, sem ultrapassar o limite de equilíbrio (ADR-003, D4).
+6. Calcula e mostra a média de cada grupo, a diferença entre a maior e a menor e o membro mais forte por área.
+7. Os grupos ficam guardados e podem ser consultados mais tarde.
 
 **Fluxos alternativos / exceções**
-- **2a.** Há alunos sem perfil → o sistema avisa e coloca-os no fim da ordenação com média neutra (3,0).
+- **2a.** Há alunos sem dados nenhuns no perfil → entram na ordenação com média neutra 3,0 e ficam assinalados; ninguém é excluído (ADR-003, D5).
 - **5a.** A diferença entre médias ultrapassa o limite → aviso ao docente, que pode ajustar (UC12) ou aceitar.
-- **6a.** O docente gera de novo → os grupos anteriores não confirmados são substituídos.
+- **7a.** O docente gera de novo → fica uma nova geração; as anteriores continuam consultáveis.
 
 **Regras de negócio**
-- RN23: a ordenação usa a média geral do perfil (RN15); em caso de empate, ordem alfabética.
-- RN24: limite de equilíbrio: diferença máxima entre médias de grupos ≤ **0,5** (configurável por contexto).
+- RN23: a ordenação usa a média geral do perfil (RN15); em caso de empate, o número de estudante (único, logo o resultado é sempre o mesmo). *(Sprint 3: substitui a ordem alfabética; ver ADR-003, D3.)*
+- RN24: limite de equilíbrio: diferença máxima entre médias de grupos ≤ **0,5** (parâmetro do algoritmo).
 
 **Exemplo (10 alunos, 2 grupos de 5):** ordem H, F, G, E, C, D, I, B, A, J → G1, G2, G2, G1, G1, G2, G2, G1, G1, G2. Resultado: G1 = {H, E, C, B, A}, G2 = {F, G, D, I, J}, com médias 14,2 e 13,8 em notas (praticamente iguais).
 
@@ -553,9 +554,9 @@ flowchart LR
 | RN18 | Resultado por área = média das respostas | UC08 |
 | RN19 | `pesoQuiz = max(0, 1 − n/N)`, N = 6 | UC09 |
 | RN20 | Regra de transição testada | UC09 |
-| RN21 | Nº de grupos e tamanhos com diferença ≤ 1 | UC10 |
+| RN21 | Grupos de 4 ou 5; configurações impossíveis rejeitadas | UC10 |
 | RN22 | Contexto pertence a uma UC e a um docente | UC10 |
-| RN23 | Ordenação por média; empate alfabético | UC11 |
+| RN23 | Ordenação por média; empate pelo nº de estudante | UC11 |
 | RN24 | Diferença entre médias de grupos ≤ 0,5 | UC11, UC12 |
 | RN25 | Ajustes manuais registados | UC12 |
 | RN26 | Explicação sem expor notas individuais | UC13 |
