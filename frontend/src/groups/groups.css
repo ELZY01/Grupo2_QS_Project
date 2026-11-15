@@ -156,6 +156,9 @@
   display: grid;
   gap: 8px;
   align-content: start;
+  /* Os grupos aparecem pela ordem G1, G2, …: a mesma ordem da distribuição em serpentina. */
+  animation: rise-in var(--t-enter) var(--ease-out) backwards;
+  animation-delay: calc(var(--i, 0) * var(--stagger) * 2);
 }
 
 .group-card-header {
@@ -217,10 +220,4 @@
 
 .group-area-label {
   color: var(--muted);
-}
-
-/* Os grupos aparecem pela ordem G1, G2, …: a mesma ordem da distribuição em serpentina. */
-.group-card {
-  animation: rise-in var(--t-enter) var(--ease-out) backwards;
-  animation-delay: calc(var(--i, 0) * var(--stagger) * 2);
 }
