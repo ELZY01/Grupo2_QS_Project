@@ -283,7 +283,7 @@
 .competency-bar span {
   display: block;
   height: 100%;
-  background: var(--primary);
+  background: var(--area, var(--primary));
   /* A barra cresce do zero até ao nível: lê-se como um valor, não como um bloco. */
   transform-origin: left;
   animation: grow-x var(--t-enter) var(--ease-smooth) backwards;
@@ -386,3 +386,9 @@
     align-items: flex-start;
   }
 }
+
+/* Cada competência com a cor da sua área, igual aos pontos e ao Pix. */
+.competency-area-org { --area: var(--area-org); }
+.competency-area-tempo { --area: var(--area-tempo); }
+.competency-area-prog { --area: var(--area-prog); }
+.competency-area-equipa { --area: var(--area-equipa); }

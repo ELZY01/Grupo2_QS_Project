@@ -56,9 +56,10 @@
 
 .sx-card {
   background: var(--surface);
-  border: 1px solid var(--line);
+  border: 1px solid var(--line-strong);
   border-radius: var(--radius-lg);
   padding: var(--s-6);
+  box-shadow: var(--shadow-pixel);
 }
 
 .sx-actions {
@@ -118,10 +119,10 @@
 }
 
 .sx-hero-text h1 {
-  font-size: clamp(2rem, 4.2vw, 3rem);
-  line-height: 1.08;
-  letter-spacing: -0.035em;
-  font-weight: 600;
+  font-size: clamp(2.25rem, 5vw, 3.5rem);
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+  font-weight: 700;
   max-width: 18ch;
   text-wrap: balance;
 }
@@ -429,6 +430,7 @@
 }
 
 .sx-tabs {
+  position: relative;
   display: flex;
   align-self: stretch;
   gap: var(--s-1);
@@ -458,14 +460,17 @@
   color: var(--ink);
 }
 
-.sx-tabs button.active::after {
-  content: '';
+/* Traço do separador ativo: um só elemento que desliza até ao separador escolhido,
+   para se ver de onde se veio. */
+.sx-tab-bar {
   position: absolute;
-  left: var(--s-3);
-  right: var(--s-3);
+  left: 0;
   bottom: 0;
   height: 2px;
   background: var(--primary);
+  transition:
+    transform var(--t-slow) var(--ease-smooth),
+    width var(--t-slow) var(--ease-smooth);
 }
 
 .sx-page {

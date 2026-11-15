@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { getProfile } from '../api/profileApi';
 import AcademicHistory from '../components/AcademicHistory';
 import CompetencyProfile from '../components/CompetencyProfile';
 import '../components/StudentRecords.css';
 import Mascot from '../mascot/Mascot.jsx';
 import { AREAS, pickMascot } from '../mascot/mascot.js';
+import { useTabBar } from './useTabBar.js';
 
 // O que cada área acrescenta ao Pix em cada nível (igual à folha de design).
 const UNLOCKS = {
@@ -39,13 +40,15 @@ export default function StudentHome({ studentId, onLogout }) {
   }, [load]);
 
   const mascot = profile ? pickMascot(profile.competencies) : null;
+  const navRef = useRef(null);
+  const bar = useTabBar(navRef, tab);
   const firstName = profile?.studentName?.split(' ')[0] ?? '';
 
   return (
     <div className="sx-home">
       <header className="sx-topbar">
         <p className="sx-brand">StudyMatch</p>
-        <nav className="sx-tabs" aria-label="A minha área">
+        <nav className="sx-tabs" aria-label="A minha área" ref={navRef}>
           {TABS.map((t) => (
             <button
               key={t.id}
@@ -57,6 +60,13 @@ export default function StudentHome({ studentId, onLogout }) {
               {t.label}
             </button>
           ))}
+          {bar && (
+            <span
+              className="sx-tab-bar"
+              aria-hidden="true"
+              style={{ width: bar.width, transform: `translateX(${bar.left}px)` }}
+            />
+          )}
         </nav>
         <button type="button" className="sx-link" onClick={onLogout}>
           Sair
