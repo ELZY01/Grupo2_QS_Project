@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080';
+import { API_URL, apiFetch } from './http';
 const STUDENTS_URL = `${API_URL}/api/students`;
 
 // Mensagens usadas quando a API não envia o texto do erro.
@@ -46,7 +46,7 @@ async function handleResponse(response) {
  * @returns {Promise<Array>} lista de estudantes
  */
 export async function getStudents() {
-  const response = await fetch(STUDENTS_URL);
+  const response = await apiFetch(STUDENTS_URL);
   return handleResponse(response);
 }
 
@@ -55,7 +55,7 @@ export async function getStudents() {
  * @param {object} student dados do novo estudante
  */
 export async function createStudent(student) {
-  const response = await fetch(STUDENTS_URL, {
+  const response = await apiFetch(STUDENTS_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(student),
@@ -69,7 +69,7 @@ export async function createStudent(student) {
  * @param {object} student dados atualizados
  */
 export async function updateStudent(id, student) {
-  const response = await fetch(`${STUDENTS_URL}/${id}`, {
+  const response = await apiFetch(`${STUDENTS_URL}/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(student),

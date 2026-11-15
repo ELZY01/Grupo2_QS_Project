@@ -2,12 +2,20 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import Login from './Login.jsx';
 
-const STUDENTS = [{ id: 3, studentNumber: '2024099', email: 'tf@upt.pt', name: 'Teste Francisco' }];
+const SESSION = { token: 'tok', role: 'ALUNO', userId: 5, studentId: 3, displayName: 'Teste Francisco' };
+
+const jsonResponse = (status, body) => ({ ok: status >= 200 && status < 300, status, json: async () => body });
 
 const setup = () => {
-  const props = { onBack: vi.fn(), onRegister: vi.fn(), onStudent: vi.fn(), onAdmin: vi.fn() };
+  const props = { onBack: vi.fn(), onRegister: vi.fn(), onLogin: vi.fn() };
   render(<Login {...props} />);
   return props;
+};
+
+const fill = (user, password) => {
+  fireEvent.change(screen.getByLabelText('Número de estudante, email ou utilizador'), { target: { value: user } });
+  fireEvent.change(screen.getByLabelText('Palavra-passe'), { target: { value: password } });
+  fireEvent.click(screen.getByRole('button', { name: 'Entrar' }));
 };
 
 afterEach(() => {
@@ -16,31 +24,43 @@ afterEach(() => {
 });
 
 describe('Login', () => {
-  it('asks for a password only for the admin user and rejects a wrong one', () => {
+  it('always asks for the password and checks it in the backend', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(jsonResponse(200, SESSION));
     const props = setup();
-    expect(screen.queryByLabelText('Palavra-passe')).not.toBeInTheDocument();
 
-    fireEvent.change(screen.getByLabelText('Número de estudante ou email'), { target: { value: 'admin' } });
-    fireEvent.change(screen.getByLabelText('Palavra-passe'), { target: { value: 'errada' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Entrar' }));
+    fill(' TF@upt.pt ', 'segredo123');
 
-    expect(screen.getByRole('alert')).toHaveTextContent('Palavra-passe de administrador errada.');
-    expect(props.onAdmin).not.toHaveBeenCalled();
+    await vi.waitFor(() => expect(props.onLogin).toHaveBeenCalledWith(SESSION));
+    const [url, options] = globalThis.fetch.mock.calls[0];
+    expect(url).toBe('http://localhost:8080/api/auth/login');
+    expect(JSON.parse(options.body)).toEqual({ username: 'TF@upt.pt', password: 'segredo123' });
   });
 
-  it('lets the admin in with the right password', () => {
+  it('shows the error for wrong credentials', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      jsonResponse(401, { message: 'Utilizador ou palavra-passe errados.' }),
+    );
     const props = setup();
-    fireEvent.change(screen.getByLabelText('Número de estudante ou email'), { target: { value: 'admin' } });
-    fireEvent.change(screen.getByLabelText('Palavra-passe'), { target: { value: 'studymatch' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Entrar' }));
-    expect(props.onAdmin).toHaveBeenCalled();
+
+    fill('admin', 'errada');
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Utilizador ou palavra-passe errados.');
+    expect(props.onLogin).not.toHaveBeenCalled();
   });
 
-  it('finds a student by number or email', async () => {
-    vi.spyOn(globalThis, 'fetch').mockResolvedValue({ ok: true, status: 200, json: () => Promise.resolve(STUDENTS) });
-    const props = setup();
-    fireEvent.change(screen.getByLabelText('Número de estudante ou email'), { target: { value: 'TF@upt.pt' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Entrar' }));
-    await vi.waitFor(() => expect(props.onStudent).toHaveBeenCalledWith(STUDENTS[0]));
+  it('does not call the backend without user or password', () => {
+    vi.spyOn(globalThis, 'fetch');
+    setup();
+
+    fill('admin', '');
+
+    expect(screen.getByRole('alert')).toHaveTextContent('Escreve a palavra-passe.');
+    expect(globalThis.fetch).not.toHaveBeenCalled();
+  });
+
+  it('no longer has the admin password in the frontend', async () => {
+    const session = await import('../auth/session.js');
+    expect(session.ADMIN_PASSWORD).toBeUndefined();
+    expect(session.isAdminLogin).toBeUndefined();
   });
 });

@@ -42,7 +42,8 @@ describe('StudentManager', () => {
     const created = { ...ANA, id: 2, name: 'Bruno Costa', email: 'bruno@upt.pt', studentNumber: '2024002' };
     vi.spyOn(globalThis, 'fetch')
       .mockResolvedValueOnce(jsonResponse(200, []))
-      .mockResolvedValueOnce(jsonResponse(201, created));
+      .mockResolvedValueOnce(jsonResponse(201, created))
+      .mockResolvedValueOnce(jsonResponse(204, null));
 
     render(<StudentManager />);
     await screen.findByText('Ainda não há estudantes registados.');
@@ -53,6 +54,7 @@ describe('StudentManager', () => {
       Email: 'bruno@upt.pt',
       Curso: 'Engenharia Informática',
       'Ano curricular': '2',
+      'Palavra-passe inicial': 'segredo123',
     });
     fireEvent.click(screen.getByRole('button', { name: 'Criar estudante' }));
 
@@ -71,7 +73,7 @@ describe('StudentManager', () => {
     render(<StudentManager />);
     await screen.findByText('Ainda não há estudantes registados.');
 
-    fillForm({ Email: 'email-errado' });
+    fillForm({ Email: 'email-errado', 'Palavra-passe inicial': 'segredo123' });
     fireEvent.click(screen.getByRole('button', { name: 'Criar estudante' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent('O formato do email é inválido.');
@@ -85,11 +87,43 @@ describe('StudentManager', () => {
     render(<StudentManager />);
     await screen.findByText('Ainda não há estudantes registados.');
 
+    fillForm({ 'Palavra-passe inicial': 'segredo123' });
     fireEvent.click(screen.getByRole('button', { name: 'Criar estudante' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'O email ou o número de estudante já está registado.'
     );
+  });
+
+  it('asks for an initial password of 8+ characters before creating', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(jsonResponse(200, []));
+
+    render(<StudentManager />);
+    await screen.findByText('Ainda não há estudantes registados.');
+
+    fillForm({ 'Palavra-passe inicial': 'curta' });
+    fireEvent.click(screen.getByRole('button', { name: 'Criar estudante' }));
+
+    expect(screen.getByRole('alert')).toHaveTextContent('A palavra-passe tem de ter pelo menos 8 caracteres.');
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('sets a new password when editing only if one is typed', async () => {
+    vi.spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(jsonResponse(200, [ANA]))
+      .mockResolvedValueOnce(jsonResponse(200, ANA))
+      .mockResolvedValueOnce(jsonResponse(204, null));
+
+    render(<StudentManager />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Editar' }));
+    fillForm({ 'Nova palavra-passe (opcional)': 'novaPass123' });
+    fireEvent.click(screen.getByRole('button', { name: 'Guardar alterações' }));
+
+    expect(await screen.findByText('Estudante atualizado.')).toBeInTheDocument();
+    const [url, options] = globalThis.fetch.mock.calls[2];
+    expect(url).toBe('http://localhost:8080/api/admin/students/1/password');
+    expect(options.method).toBe('PUT');
+    expect(JSON.parse(options.body)).toEqual({ password: 'novaPass123' });
   });
 
   it('edits a student with PUT', async () => {

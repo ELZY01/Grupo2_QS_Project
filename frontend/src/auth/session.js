@@ -1,22 +1,36 @@
 /**
- * Sessão guardada no browser.
+ * Sessão guardada no browser, depois do login no backend (POST /api/auth/login).
  *
- * ATENÇÃO: o backend ainda não tem autenticação. O administrador é validado só no
- * frontend, com as credenciais de demonstração abaixo (podem ser trocadas no .env).
- * Para produção é preciso autenticação no backend (Spring Security).
+ * A sessão só guarda o token e os dados para mostrar; quem decide as permissões é o backend.
+ * Roles: 'admin', 'docente' e 'student'.
  */
-export const ADMIN_USER = import.meta.env.VITE_ADMIN_USER ?? 'admin';
-export const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD ?? 'studymatch';
-
 const KEY = 'studymatch.session';
+
+export const SESSION_EXPIRED_EVENT = 'studymatch:session-expired';
+
+// Role do backend → role usada no frontend.
+const ROLES = { ADMIN: 'admin', DOCENTE: 'docente', ALUNO: 'student' };
+
+/**
+ * Converte a resposta do login/registo numa sessão do frontend.
+ */
+export function sessionFromLogin(response) {
+  return {
+    role: ROLES[response.role],
+    token: response.token,
+    id: response.studentId ?? null,
+    userId: response.userId,
+    name: response.displayName,
+  };
+}
 
 export function readSession() {
   try {
     const raw = window.localStorage.getItem(KEY);
     const session = raw ? JSON.parse(raw) : null;
-    if (session?.role === 'admin') return { role: 'admin' };
-    if (session?.role === 'student' && Number.isFinite(session.id)) return session;
-    return null;
+    if (!session?.token || !Object.values(ROLES).includes(session.role)) return null;
+    if (session.role === 'student' && !Number.isFinite(session.id)) return null;
+    return session;
   } catch {
     return null;
   }
@@ -31,4 +45,9 @@ export function saveSession(session) {
   }
 }
 
-export const isAdminLogin = (user, password) => user === ADMIN_USER && password === ADMIN_PASSWORD;
+/**
+ * Token da sessão atual, ou null.
+ */
+export function getToken() {
+  return readSession()?.token ?? null;
+}

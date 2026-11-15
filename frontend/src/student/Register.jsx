@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { createStudent } from '../api/studentApi';
+import { register } from '../api/authApi';
 import Egg from '../mascot/Egg.jsx';
 
-const EMPTY = { name: '', studentNumber: '', email: '', course: '', academicYear: 1 };
+const EMPTY = { name: '', studentNumber: '', email: '', course: '', academicYear: 1, password: '', confirm: '' };
+const MIN_PASSWORD = 8;
 
 /**
- * O estudante cria o seu perfil. A seguir vai direto para o quiz.
+ * O estudante cria o seu perfil e a palavra-passe. A seguir vai direto para o quiz.
+ * onCreated recebe a sessão devolvida pelo backend (já com o token).
  */
 export default function Register({ onBack, onCreated }) {
   const [values, setValues] = useState(EMPTY);
@@ -16,17 +18,26 @@ export default function Register({ onBack, onCreated }) {
 
   const submit = async (e) => {
     e.preventDefault();
-    setSaving(true);
     setError(null);
+    if (values.password.length < MIN_PASSWORD) {
+      setError(`A palavra-passe tem de ter pelo menos ${MIN_PASSWORD} caracteres.`);
+      return;
+    }
+    if (values.password !== values.confirm) {
+      setError('As palavras-passe não são iguais.');
+      return;
+    }
+    setSaving(true);
     try {
-      const created = await createStudent({
+      const session = await register({
         name: values.name.trim(),
         studentNumber: values.studentNumber.trim(),
         email: values.email.trim(),
         course: values.course.trim(),
         academicYear: Number(values.academicYear),
+        password: values.password,
       });
-      onCreated(created);
+      onCreated(session);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -76,6 +87,17 @@ export default function Register({ onBack, onCreated }) {
           Curso
           <input name="course" value={values.course} onChange={change} placeholder="Ex.: Engenharia Informática" />
         </label>
+
+        <div className="sx-row">
+          <label>
+            Palavra-passe
+            <input name="password" type="password" value={values.password} onChange={change} autoComplete="new-password" />
+          </label>
+          <label>
+            Repete a palavra-passe
+            <input name="confirm" type="password" value={values.confirm} onChange={change} autoComplete="new-password" />
+          </label>
+        </div>
 
         {error && (
           <p className="sx-error" role="alert">

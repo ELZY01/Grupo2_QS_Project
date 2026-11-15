@@ -491,6 +491,44 @@ flowchart LR
 
 ---
 
+### Área 7 — Perfil Docente
+
+#### UC17 — Associar docentes e alunos às UCs
+
+**Ator:** Administrador.
+**Objetivo:** definir quem leciona cada UC e que alunos a frequentam (separado do histórico de notas).
+
+**Fluxo principal:**
+1. O admin escolhe uma UC.
+2. Associa um ou mais docentes (pode criar a conta de um docente novo).
+3. Inscreve os alunos que frequentam a UC; pode removê-los.
+
+**Fluxos alternativos:**
+- **3a.** O aluno já está inscrito na UC → 409, "Este aluno já está inscrito nesta UC."
+
+**Regras:**
+- R1: só o Admin inscreve/remove alunos em UCs; Docente e Aluno recebem 403.
+- R2: o Admin associa docente(s) a UCs.
+
+#### UC18 — Área do docente
+
+**Ator:** Docente.
+**Objetivo:** conhecer a turma de cada UC antes de formar grupos.
+
+**Fluxo principal:**
+1. O docente vê só as UCs que lhe estão atribuídas.
+2. Escolhe uma UC e vê os alunos inscritos.
+3. Escolhe um aluno e vê as competências, as notas e o histórico.
+
+**Regras:**
+- R3: o Docente só vê as suas UCs e os alunos inscritos nelas.
+- R6: estatísticas por aluno a partir dos dados que já existem (perfil e histórico); estado vazio quando não há dados. As estatísticas por grupo e a gestão de grupos (R4, R5) dependem da formação de grupos (#68–#71).
+- R7: pedidos fora destas permissões devolvem 403; sem sessão, 401.
+
+**Conceitos de domínio:** Docente, Unidade curricular, Inscrição na UC, Perfil de competências.
+
+---
+
 ## 7. Resumo das regras de negócio
 
 | ID | Regra | UC |

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { setStudentPassword } from '../api/authApi';
 import { createStudent, getStudents, updateStudent } from '../api/studentApi';
 import StudentForm from './StudentForm';
 import StudentList from './StudentList';
@@ -36,17 +37,20 @@ export default function StudentManager() {
   }, [loadStudents]);
 
   // Cria ou atualiza, conforme haja um estudante em edição.
-  const handleSubmit = async (data) => {
+  // A palavra-passe (se houver) é definida a seguir, na conta do aluno.
+  const handleSubmit = async (data, password) => {
     setSaving(true);
     setFormError(null);
     setSuccess(null);
     try {
       if (editing) {
         const updated = await updateStudent(editing.id, data);
+        if (password) await setStudentPassword(updated.id, password);
         setStudents((list) => list.map((s) => (s.id === updated.id ? updated : s)));
         setSuccess('Estudante atualizado.');
       } else {
         const created = await createStudent(data);
+        await setStudentPassword(created.id, password);
         setStudents((list) => [...list, created]);
         setSuccess('Estudante criado.');
       }

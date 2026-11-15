@@ -6,21 +6,27 @@ const EMPTY_STUDENT = {
   email: '',
   course: '',
   academicYear: 1,
+  password: '',
 };
+
+const MIN_PASSWORD = 8;
 
 /**
  * Formulário para criar ou editar um estudante.
  *
- * Não comunica com a API: devolve os dados através de onSubmit,
+ * Não comunica com a API: devolve os dados e a palavra-passe através de onSubmit(data, password),
  * e mostra o erro que recebe em `error`.
+ * A palavra-passe é obrigatória ao criar; ao editar só muda se for preenchida.
  */
 export default function StudentForm({ student, onSubmit, onCancel, error, saving }) {
   const isEditing = Boolean(student);
   const [values, setValues] = useState(EMPTY_STUDENT);
+  const [passwordError, setPasswordError] = useState(null);
 
   // Preenche o formulário quando se escolhe um estudante para editar.
   useEffect(() => {
-    setValues(student ? { ...EMPTY_STUDENT, ...student } : EMPTY_STUDENT);
+    setValues(student ? { ...EMPTY_STUDENT, ...student, password: '' } : EMPTY_STUDENT);
+    setPasswordError(null);
   }, [student]);
 
   const handleChange = (event) => {
@@ -30,13 +36,19 @@ export default function StudentForm({ student, onSubmit, onCancel, error, saving
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    const password = values.password;
+    if ((!isEditing || password) && password.length < MIN_PASSWORD) {
+      setPasswordError(`A palavra-passe tem de ter pelo menos ${MIN_PASSWORD} caracteres.`);
+      return;
+    }
+    setPasswordError(null);
     onSubmit({
       studentNumber: values.studentNumber.trim(),
       name: values.name.trim(),
       email: values.email.trim(),
       course: values.course.trim(),
       academicYear: Number(values.academicYear),
-    });
+    }, password || null);
   };
 
   return (
@@ -74,9 +86,21 @@ export default function StudentForm({ student, onSubmit, onCancel, error, saving
         />
       </label>
 
-      {error && (
+      <label>
+        {isEditing ? 'Nova palavra-passe (opcional)' : 'Palavra-passe inicial'}
+        <input
+          name="password"
+          type="password"
+          value={values.password}
+          onChange={handleChange}
+          autoComplete="new-password"
+          placeholder={isEditing ? 'Deixa vazio para manter' : 'Mínimo 8 caracteres'}
+        />
+      </label>
+
+      {(passwordError || error) && (
         <p className="student-error" role="alert">
-          {error}
+          {passwordError || error}
         </p>
       )}
 

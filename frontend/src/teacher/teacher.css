@@ -1,0 +1,96 @@
+/* Área do docente */
+.teacher-nav-title {
+  margin: 0 0 4px;
+  padding: 0 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+}
+
+.app-nav button .teacher-count {
+  display: block;
+}
+
+.teacher-count {
+  font-size: 0.85em;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.teacher-tabs {
+  display: flex;
+  gap: 6px;
+}
+
+.teacher-tabs button.active {
+  background: var(--primary-soft);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.teacher-layout {
+  display: grid;
+  grid-template-columns: minmax(240px, 320px) 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 860px) {
+  .teacher-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.teacher-students h2,
+.teacher-detail h2,
+.teacher-empty h2 {
+  margin: 0 0 10px;
+  font-size: 1.1rem;
+}
+
+.teacher-students ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.teacher-students button {
+  width: 100%;
+  display: grid;
+  gap: 2px;
+  text-align: left;
+}
+
+.teacher-students button.active {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.teacher-student-name {
+  font-weight: 600;
+}
+
+.teacher-detail {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
+.teacher-empty p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.teacher-error {
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--danger-soft);
+  color: var(--danger);
+}
