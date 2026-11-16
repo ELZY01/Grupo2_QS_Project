@@ -167,6 +167,72 @@ class CourseUnitAssignmentServiceTest {
                 () -> service.createTeacher(new CreateTeacherRequest("rui", "Rui", "curta"))).getStatusCode());
     }
 
+    // --- Casos limite ------------------------------------------------------
+
+    @Test
+    void listsTheTeacherAccounts() {
+        when(users.findByRoleOrderByDisplayNameAsc(Role.DOCENTE)).thenReturn(List.of(teacher));
+
+        var list = service.listTeachers();
+
+        assertEquals(1, list.size());
+        assertEquals("prof", list.get(0).username());
+    }
+
+    @Test
+    void aTeacherNeedsAUsernameAndAName() {
+        assertEquals(HttpStatus.BAD_REQUEST, assertThrows(ResponseStatusException.class,
+                () -> service.createTeacher(null)).getStatusCode());
+        assertEquals(HttpStatus.BAD_REQUEST, assertThrows(ResponseStatusException.class,
+                () -> service.createTeacher(new CreateTeacherRequest("  ", "Rita", "segredo123"))).getStatusCode());
+        assertEquals(HttpStatus.BAD_REQUEST, assertThrows(ResponseStatusException.class,
+                () -> service.createTeacher(new CreateTeacherRequest("rita", null, "segredo123"))).getStatusCode());
+        verify(users, never()).save(any());
+    }
+
+    @Test
+    void nullIdsAreTreatedAsNotFound() {
+        when(courseUnits.findById(-1L)).thenReturn(Optional.empty());
+        when(users.findById(-1L)).thenReturn(Optional.empty());
+        when(students.findById(-1L)).thenReturn(Optional.empty());
+
+        assertEquals(HttpStatus.NOT_FOUND, assertThrows(ResponseStatusException.class,
+                () -> service.getAssignments(null)).getStatusCode());
+        assertEquals(HttpStatus.NOT_FOUND, assertThrows(ResponseStatusException.class,
+                () -> service.assignTeacher(10L, null)).getStatusCode());
+        assertEquals(HttpStatus.NOT_FOUND, assertThrows(ResponseStatusException.class,
+                () -> service.enrollStudent(10L, null)).getStatusCode());
+    }
+
+    @Test
+    void removesAnAssignedTeacherAndFailsIfNotAssigned() {
+        CourseUnitTeacher link = new CourseUnitTeacher(qs, teacher);
+        when(teachers.findByCourseUnitIdAndTeacherId(10L, 3L)).thenReturn(Optional.of(link));
+
+        service.removeTeacher(10L, 3L);
+        verify(teachers).delete(link);
+
+        when(teachers.findByCourseUnitIdAndTeacherId(10L, 4L)).thenReturn(Optional.empty());
+        var error = assertThrows(ResponseStatusException.class, () -> service.removeTeacher(10L, 4L));
+        assertEquals(HttpStatus.NOT_FOUND, error.getStatusCode());
+        assertEquals("Este docente não está associado a esta UC.", error.getReason());
+    }
+
+    @Test
+    void theAssignmentsListTheTeachersAndTheEnrolledStudents() {
+        when(teachers.findByCourseUnitIdOrderByTeacherDisplayNameAsc(10L))
+                .thenReturn(List.of(new CourseUnitTeacher(qs, teacher)));
+        when(enrolled.findByCourseUnitIdOrderByStudentNameAsc(10L))
+                .thenReturn(List.of(new CourseUnitStudent(qs, ana)));
+
+        var assignments = service.getAssignments(10L);
+
+        assertEquals(1, assignments.teachers().size());
+        assertEquals("Prof. Rita", assignments.teachers().get(0).displayName());
+        assertEquals(1, assignments.students().size());
+        assertEquals("Ana", assignments.students().get(0).name());
+    }
+
     private static <T> T withId(T entity, Long id) {
         ReflectionTestUtils.setField(entity, "id", id);
         return entity;
