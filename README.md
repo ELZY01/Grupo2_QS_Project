@@ -138,6 +138,17 @@ cd frontend && npm test           # frontend (Vitest)
 
 Os testes do backend **não precisam das credenciais da base de dados**: usam uma base H2 em memória (perfil `test`). O `clean test` compila o projeto e corre todos os testes unitários, incluindo as regras do perfil de competências (`ProfileCalculatorTest`).
 
+#### Cobertura dos testes (JaCoCo)
+
+O mesmo `clean test` gera o relatório de cobertura do backend (JaCoCo), sem nenhum comando extra:
+
+```bash
+cd backend && ./mvnw clean test      # Windows: mvnw.cmd clean test
+# abrir backend/target/site/jacoco/index.html no browser (Windows: start target\site\jacoco\index.html)
+```
+
+O relatório mostra a cobertura de linhas e de ramos por pacote e por classe. A medição inicial, as classes mais fracas e a meta estão em [`docs/qualidade/cobertura.md`](docs/qualidade/cobertura.md). O `jacoco.xml` gerado é o que o SonarQube lê para mostrar a cobertura.
+
 Para gerar o artefacto do backend (`backend/target/backend-*.jar`):
 
 ```bash
