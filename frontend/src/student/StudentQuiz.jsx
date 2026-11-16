@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { fetchQuiz, submitQuizSubmission } from '../api/quizApi';
 import Egg from '../mascot/Egg.jsx';
 import { eggStage } from '../mascot/mascot.js';
@@ -24,6 +24,10 @@ export default function StudentQuiz({ studentId, onDone }) {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  // Avanço automático pendente: cancela-se ao sair do ecrã ou quando há uma nova escolha.
+  const advanceTimer = useRef(null);
+
+  useEffect(() => () => clearTimeout(advanceTimer.current), []);
 
   useEffect(() => {
     fetchQuiz()
@@ -51,6 +55,7 @@ export default function StudentQuiz({ studentId, onDone }) {
   const stage = useMemo(() => eggStage(answered, total), [answered, total]);
 
   const goTo = (next) => {
+    clearTimeout(advanceTimer.current);
     setDirection(next < index ? 'prev' : 'next');
     setIndex(next);
   };
@@ -58,8 +63,10 @@ export default function StudentQuiz({ studentId, onDone }) {
   const choose = (value) => {
     setAnswers((a) => ({ ...a, [question.id]: value }));
     // Avança sozinho para a próxima pergunta, depois de a escolha ter tempo de se ver.
+    // Duas escolhas seguidas só avançam uma pergunta.
+    clearTimeout(advanceTimer.current);
     if (index < total - 1) {
-      setTimeout(() => {
+      advanceTimer.current = setTimeout(() => {
         setDirection('next');
         setIndex((i) => Math.min(i + 1, total - 1));
       }, 220);
