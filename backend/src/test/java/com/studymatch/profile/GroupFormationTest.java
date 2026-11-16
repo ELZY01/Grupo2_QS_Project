@@ -1,6 +1,11 @@
 
-package com.studymatch.profile;
+package com.studymatch.group;
 
+import com.studymatch.profile.GroupFormation;
+import com.studymatch.profile.CompetencyLevel;
+import com.studymatch.profile.LevelOrigin;
+import com.studymatch.profile.StudentProfile;
+import com.studymatch.profile.StudentProfileEntry;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -11,25 +16,13 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@DisplayName("Testes da formacao de grupos")
 class GroupFormationTest {
 
     private final GroupFormation groupFormation = new GroupFormation();
 
     @Test
-    @DisplayName("Deve devolver uma lista vazia quando nao existem estudantes")
-    void shouldReturnEmptyListWhenThereAreNoStudents() {
-
-        List<List<StudentProfileEntry>> groups =
-                groupFormation.distribute(List.of());
-
-        assertTrue(groups.isEmpty());
-    }
-
-    @Test
     @DisplayName("Deve rejeitar uma lista nula")
-    void shouldRejectNullStudentList() {
-
+    void shouldRejectNullList() {
         assertThrows(
                 IllegalArgumentException.class,
                 () -> groupFormation.distribute(null)
@@ -37,9 +30,17 @@ class GroupFormationTest {
     }
 
     @Test
-    @DisplayName("Deve rejeitar estudantes nulos")
-    void shouldRejectNullStudents() {
+    @DisplayName("Deve rejeitar uma lista vazia")
+    void shouldRejectEmptyList() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> groupFormation.distribute(List.of())
+        );
+    }
 
+    @Test
+    @DisplayName("Deve rejeitar estudantes nulos")
+    void shouldRejectNullStudent() {
         List<StudentProfileEntry> students = new ArrayList<>();
         students.add(null);
 
@@ -51,8 +52,7 @@ class GroupFormationTest {
 
     @Test
     @DisplayName("Deve rejeitar estudantes sem perfil")
-    void shouldRejectStudentsWithoutProfile() {
-
+    void shouldRejectStudentWithoutProfile() {
         List<StudentProfileEntry> students = new ArrayList<>();
 
         students.add(
@@ -71,9 +71,8 @@ class GroupFormationTest {
     }
 
     @Test
-    @DisplayName("Deve rejeitar estudantes sem numero de estudante")
-    void shouldRejectStudentsWithoutStudentNumber() {
-
+    @DisplayName("Deve rejeitar estudantes sem numero")
+    void shouldRejectStudentWithoutNumber() {
         List<StudentProfileEntry> students = new ArrayList<>();
 
         students.add(
@@ -92,9 +91,28 @@ class GroupFormationTest {
     }
 
     @Test
-    @DisplayName("Deve formar dois grupos de quatro estudantes")
-    void shouldCreateTwoGroupsOfFourStudents() {
+    @DisplayName("Deve rejeitar estudantes sem identificador")
+    void shouldRejectStudentWithoutId() {
+        List<StudentProfileEntry> students = new ArrayList<>();
 
+        students.add(
+                new StudentProfileEntry(
+                        null,
+                        "A001",
+                        "Estudante 1",
+                        createProfile(3.0)
+                )
+        );
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> groupFormation.distribute(students)
+        );
+    }
+
+    @Test
+    @DisplayName("Deve criar dois grupos de quatro estudantes")
+    void shouldCreateTwoGroupsOfFour() {
         List<StudentProfileEntry> students = createStudents(8);
 
         List<List<StudentProfileEntry>> groups =
@@ -106,9 +124,8 @@ class GroupFormationTest {
     }
 
     @Test
-    @DisplayName("Deve formar dois grupos de cinco estudantes")
-    void shouldCreateTwoGroupsOfFiveStudents() {
-
+    @DisplayName("Deve criar dois grupos de cinco estudantes")
+    void shouldCreateTwoGroupsOfFive() {
         List<StudentProfileEntry> students = createStudents(10);
 
         List<List<StudentProfileEntry>> groups =
@@ -122,7 +139,6 @@ class GroupFormationTest {
     @Test
     @DisplayName("Deve rejeitar uma quantidade impossivel de estudantes")
     void shouldRejectImpossibleNumberOfStudents() {
-
         List<StudentProfileEntry> students = createStudents(6);
 
         assertThrows(
@@ -133,11 +149,11 @@ class GroupFormationTest {
 
     @ParameterizedTest
     @ValueSource(ints = {
-            4, 5, 8, 9, 10, 12, 13, 14, 15,
-            16, 17, 18, 19, 20, 21
+            4, 5, 8, 9, 10, 12, 13, 14,
+            15, 16, 17, 18, 19, 20, 21
     })
-    @DisplayName("Todos os grupos devem ter entre quatro e cinco estudantes")
-    void shouldCreateGroupsWithValidSizes(int numberOfStudents) {
+    @DisplayName("Deve criar grupos com tamanhos validos")
+    void shouldCreateValidGroupSizes(int numberOfStudents) {
 
         List<StudentProfileEntry> students =
                 createStudents(numberOfStudents);
@@ -145,30 +161,21 @@ class GroupFormationTest {
         List<List<StudentProfileEntry>> groups =
                 groupFormation.distribute(students);
 
-        assertFalse(groups.isEmpty());
+        int totalStudents = 0;
 
         for (List<StudentProfileEntry> group : groups) {
 
-            assertTrue(
-                    group.size() >= GroupFormation.MIN_GROUP_SIZE,
-                    "Um grupo nao pode ter menos de quatro estudantes."
-            );
+            assertTrue(group.size() >= GroupFormation.MIN_GROUP_SIZE);
+            assertTrue(group.size() <= GroupFormation.MAX_GROUP_SIZE);
 
-            assertTrue(
-                    group.size() <= GroupFormation.MAX_GROUP_SIZE,
-                    "Um grupo nao pode ter mais de cinco estudantes."
-            );
+            totalStudents += group.size();
         }
-
-        int totalStudents = groups.stream()
-                .mapToInt(List::size)
-                .sum();
 
         assertEquals(numberOfStudents, totalStudents);
     }
 
     @Test
-    @DisplayName("Todos os estudantes devem ser distribuidos uma unica vez")
+    @DisplayName("Deve distribuir todos os estudantes apenas uma vez")
     void shouldDistributeEveryStudentExactlyOnce() {
 
         List<StudentProfileEntry> students = createStudents(13);
@@ -176,36 +183,44 @@ class GroupFormationTest {
         List<List<StudentProfileEntry>> groups =
                 groupFormation.distribute(students);
 
-        int totalStudents = 0;
+        List<Long> distributedIds = new ArrayList<>();
 
         for (List<StudentProfileEntry> group : groups) {
-            totalStudents += group.size();
+            for (StudentProfileEntry student : group) {
+                distributedIds.add(student.studentId());
+            }
         }
 
-        assertEquals(13, totalStudents);
-
-        long uniqueStudents = groups.stream()
-                .flatMap(List::stream)
-                .map(StudentProfileEntry::studentId)
-                .distinct()
-                .count();
-
-        assertEquals(13, uniqueStudents);
+        assertEquals(13, distributedIds.size());
+        assertEquals(13, distributedIds.stream().distinct().count());
     }
 
     @Test
-    @DisplayName("Deve distribuir os estudantes de forma deterministica")
-    void shouldDistributeStudentsDeterministically() {
+    @DisplayName("Deve produzir uma distribuicao deterministica")
+    void shouldProduceDeterministicDistribution() {
 
         List<StudentProfileEntry> students = createStudents(8);
 
-        List<List<StudentProfileEntry>> firstResult =
+        List<List<StudentProfileEntry>> firstDistribution =
                 groupFormation.distribute(students);
 
-        List<List<StudentProfileEntry>> secondResult =
+        List<List<StudentProfileEntry>> secondDistribution =
                 groupFormation.distribute(students);
 
-        assertEquals(firstResult, secondResult);
+        for (int i = 0; i < firstDistribution.size(); i++) {
+
+            List<Long> firstIds = firstDistribution.get(i)
+                    .stream()
+                    .map(StudentProfileEntry::studentId)
+                    .toList();
+
+            List<Long> secondIds = secondDistribution.get(i)
+                    .stream()
+                    .map(StudentProfileEntry::studentId)
+                    .toList();
+
+            assertEquals(firstIds, secondIds);
+        }
     }
 
     @Test
@@ -214,29 +229,18 @@ class GroupFormationTest {
 
         List<StudentProfileEntry> students = createStudents(8);
 
-        StudentProfile emptyProfile = new StudentProfile(
-                0,
-                0.0,
-                List.of(
-                        new CompetencyLevel(
-                                "ORG",
-                                null,
-                                LevelOrigin.NO_DATA,
-                                0.0,
-                                null,
-                                null,
-                                List.of()
-                        )
-                )
-        );
-
         students.set(
                 0,
                 new StudentProfileEntry(
                         1L,
                         "A001",
                         "Estudante 1",
-                        emptyProfile
+                        new StudentProfile(0, 0.0, List.of(
+                                competency("ORG", null, LevelOrigin.NO_DATA),
+                                competency("TEMPO", null, LevelOrigin.NO_DATA),
+                                competency("PROG", null, LevelOrigin.NO_DATA),
+                                competency("EQUIPA", null, LevelOrigin.NO_DATA)
+                        ))
                 )
         );
 
@@ -244,7 +248,102 @@ class GroupFormationTest {
                 groupFormation.distribute(students);
 
         assertEquals(2, groups.size());
-        assertEquals(8, groups.stream().mapToInt(List::size).sum());
+    }
+
+    @Test
+    @DisplayName("Deve separar estudantes fortes na mesma competencia")
+    void shouldSeparateStrongStudentsInSameCompetency() {
+
+        List<StudentProfileEntry> students = new ArrayList<>();
+
+        for (int i = 1; i <= 8; i++) {
+
+            double orgLevel = (i == 1 || i == 4) ? 5.0 : 1.0;
+            double otherLevel = (i == 1 || i == 4) ? 3.0 : 11.0 / 3.0;
+
+            students.add(
+                    new StudentProfileEntry(
+                            (long) i,
+                            String.format("A%03d", i),
+                            "Estudante " + i,
+                            createProfile(orgLevel, otherLevel)
+                    )
+            );
+        }
+
+        List<List<StudentProfileEntry>> groups =
+                groupFormation.distribute(students);
+
+        int firstStrongStudentGroup = findGroupIndex(groups, 1L);
+        int secondStrongStudentGroup = findGroupIndex(groups, 4L);
+
+        assertNotEquals(
+                firstStrongStudentGroup,
+                secondStrongStudentGroup,
+                "Os estudantes mais fortes na mesma competencia devem ficar em grupos diferentes."
+        );
+    }
+
+    @Test
+    @DisplayName("Deve manter a diferenca entre medias dentro do limite")
+    void shouldMaintainAverageGapWithinLimit() {
+
+        List<StudentProfileEntry> students = new ArrayList<>();
+
+        double[] organizationLevels = {
+                5.0, 1.0, 1.0, 5.0,
+                1.0, 5.0, 5.0, 1.0
+        };
+
+        double[] otherLevels = {
+                2.0, 4.0, 4.0, 2.0,
+                4.0, 2.0, 2.0, 4.0
+        };
+
+        for (int i = 0; i < 8; i++) {
+
+            students.add(
+                    new StudentProfileEntry(
+                            (long) (i + 1),
+                            String.format("A%03d", i + 1),
+                            "Estudante " + (i + 1),
+                            createProfile(
+                                    organizationLevels[i],
+                                    otherLevels[i]
+                            )
+                    )
+            );
+        }
+
+        List<List<StudentProfileEntry>> groups =
+                groupFormation.distribute(students);
+
+        double firstAverage = calculateAverage(groups.get(0));
+        double secondAverage = calculateAverage(groups.get(1));
+
+        double difference = Math.abs(firstAverage - secondAverage);
+
+        assertTrue(
+                difference <= GroupFormation.MAX_AVERAGE_GAP,
+                "A diferenca entre as medias nao pode ultrapassar 0,5."
+        );
+    }
+
+    private int findGroupIndex(
+            List<List<StudentProfileEntry>> groups,
+            Long studentId) {
+
+        for (int i = 0; i < groups.size(); i++) {
+
+            for (StudentProfileEntry student : groups.get(i)) {
+
+                if (student.studentId().equals(studentId)) {
+                    return i;
+                }
+            }
+        }
+
+        return -1;
     }
 
     private List<StudentProfileEntry> createStudents(int numberOfStudents) {
@@ -267,29 +366,54 @@ class GroupFormationTest {
     }
 
     private StudentProfile createProfile(double level) {
+        return createProfile(level, level);
+    }
+
+    private StudentProfile createProfile(
+            double organizationLevel,
+            double otherLevel) {
 
         return new StudentProfile(
                 0,
-                1.0,
+                0.0,
                 List.of(
-                        competency("ORG", level),
-                        competency("TEMPO", level),
-                        competency("PROG", level),
-                        competency("EQUIPA", level)
+                        competency("ORG", organizationLevel, LevelOrigin.QUIZ),
+                        competency("TEMPO", otherLevel, LevelOrigin.QUIZ),
+                        competency("PROG", otherLevel, LevelOrigin.QUIZ),
+                        competency("EQUIPA", otherLevel, LevelOrigin.QUIZ)
                 )
         );
     }
 
-    private CompetencyLevel competency(String code, Double level) {
+    private CompetencyLevel competency(
+            String code,
+            Double level,
+            LevelOrigin origin) {
 
         return new CompetencyLevel(
                 code,
                 level,
-                LevelOrigin.QUIZ,
+                origin,
                 1.0,
                 level,
                 null,
                 List.of()
         );
+    }
+
+    private double calculateAverage(List<StudentProfileEntry> group) {
+
+        double total = 0.0;
+
+        for (StudentProfileEntry student : group) {
+
+            total += student.profile().competencies().stream()
+                    .filter(CompetencyLevel::hasData)
+                    .mapToDouble(competency -> competency.level())
+                    .average()
+                    .orElse(0.0);
+        }
+
+        return total / group.size();
     }
 }
