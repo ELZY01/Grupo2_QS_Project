@@ -3,6 +3,8 @@ package com.studymatch.profile;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -127,6 +129,42 @@ class GroupFormationTest {
                 IllegalArgumentException.class,
                 () -> groupFormation.distribute(students)
         );
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {
+            4, 5, 8, 9, 10, 12, 13, 14, 15,
+            16, 17, 18, 19, 20, 21
+    })
+    @DisplayName("Todos os grupos devem ter entre quatro e cinco estudantes")
+    void shouldCreateGroupsWithValidSizes(int numberOfStudents) {
+
+        List<StudentProfileEntry> students =
+                createStudents(numberOfStudents);
+
+        List<List<StudentProfileEntry>> groups =
+                groupFormation.distribute(students);
+
+        assertFalse(groups.isEmpty());
+
+        for (List<StudentProfileEntry> group : groups) {
+
+            assertTrue(
+                    group.size() >= GroupFormation.MIN_GROUP_SIZE,
+                    "Um grupo nao pode ter menos de quatro estudantes."
+            );
+
+            assertTrue(
+                    group.size() <= GroupFormation.MAX_GROUP_SIZE,
+                    "Um grupo nao pode ter mais de cinco estudantes."
+            );
+        }
+
+        int totalStudents = groups.stream()
+                .mapToInt(List::size)
+                .sum();
+
+        assertEquals(numberOfStudents, totalStudents);
     }
 
     @Test
