@@ -287,4 +287,40 @@ class QuizServiceTest {
         assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
         verify(answerRepository, never()).save(any());
     }
+
+    // ---------------------------------------------------------------
+    // Consulta de quizzes e perguntas
+    // ---------------------------------------------------------------
+
+    @Test
+    void getAllQuizzes_DevolveOsQuizzesDoRepositorio() {
+        List<Quiz> quizzes = List.of(new Quiz(), new Quiz());
+        when(quizRepository.findAll()).thenReturn(quizzes);
+
+        assertEquals(quizzes, quizService.getAllQuizzes());
+    }
+
+    @Test
+    void getQuizQuestions_QuizInexistente_Devolve404() {
+        when(quizRepository.existsById(99L)).thenReturn(false);
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+                () -> quizService.getQuizQuestions(99L));
+
+        assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
+        verifyNoInteractions(questionRepository);
+    }
+
+    @Test
+    void getQuizQuestions_DevolvePerguntasPorOrdem() {
+        Question comQuiz = new Question();
+        comQuiz.setQuiz(new Quiz());
+        Question semQuiz = new Question();
+        List<Question> perguntas = List.of(comQuiz, semQuiz);
+
+        when(quizRepository.existsById(1L)).thenReturn(true);
+        when(questionRepository.findByQuizIdOrderByQuestionOrderAsc(1L)).thenReturn(perguntas);
+
+        assertEquals(perguntas, quizService.getQuizQuestions(1L));
+    }
 }
