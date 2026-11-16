@@ -149,6 +149,35 @@ cd backend && ./mvnw clean test      # Windows: mvnw.cmd clean test
 
 O relatório mostra a cobertura de linhas e de ramos por pacote e por classe. A medição inicial, as classes mais fracas e a meta estão em [`docs/qualidade/cobertura.md`](docs/qualidade/cobertura.md). O `jacoco.xml` gerado é o que o SonarQube lê para mostrar a cobertura.
 
+#### Testes do `QuizService` (Issue #120)
+
+Testes unitários com Mockito (sem base de dados) em `backend/src/test/java/com/studymatch/service/QuizServiceTest.java`. Cobrem os caminhos de erro do quiz de arranque a frio, que antes não eram testados.
+
+| Cobertura do `QuizService` | Linhas | Ramos |
+|---|---|---|
+| Antes | 40,7% | 30,0% |
+| Depois | **100%** | **100%** |
+
+Com estes testes, a cobertura do projeto passou de 78,7% para 82,4% nas linhas e de 69,5% para 73,8% nos ramos.
+
+| Teste | O que verifica | Resultado esperado |
+|---|---|---|
+| `submitQuiz_PedidoNulo_Devolve400` | Submeter o quiz sem pedido | 400 e nada é guardado |
+| `submitQuiz_ListaDeRespostasNula_Devolve400` | Pedido sem a lista de respostas | 400 e nada é guardado |
+| `submitQuiz_RespostasAMais_Devolve400` | Pedido com 21 respostas (o quiz tem 20) | 400 e nada é guardado |
+| `submitQuiz_AlunoInexistente_Devolve404` | Submissão de um aluno que não existe | 404 "Estudante não encontrado" e a submissão não é guardada |
+| `submitQuiz_QuizInexistente_Devolve404` | Submissão para um quiz que não existe | 404 "Quiz não encontrado" e a submissão não é guardada |
+| `submitQuiz_PerguntaInexistente_Devolve400ComOId` | Resposta a uma pergunta que não existe | 400 com o ID da pergunta na mensagem e nenhuma resposta guardada |
+| `submitQuiz_ValorForaDaEscala_Devolve400` | Resposta com valor 6 (a escala é de 1 a 5) | 400 e nenhuma resposta guardada |
+| `getAllQuizzes_DevolveOsQuizzesDoRepositorio` | Listar os quizzes | Devolve os quizzes que estão na base de dados |
+| `getQuizQuestions_QuizInexistente_Devolve404` | Pedir as perguntas de um quiz que não existe | 404 e as perguntas nem chegam a ser procuradas |
+| `getQuizQuestions_DevolvePerguntasPorOrdem` | Pedir as perguntas de um quiz, com e sem o quiz associado | Devolve as perguntas pela ordem do repositório |
+| `calculateResults_CalculaAMediaPorArea` | Resultado de uma submissão com respostas de duas áreas | Média por área: Programação (5, 4, 3) = 4,0 e Organização (1, 2) = 1,5 |
+| `calculateResults_SemRespostas_DevolveMapaVazio` | Resultado de uma submissão sem respostas | Mapa vazio, sem erro |
+| `getLatestSubmission_AlunoInexistente_Devolve404` | Última submissão de um aluno que não existe | 404 e as submissões nem chegam a ser procuradas |
+| `getLatestSubmission_AlunoSemSubmissoes_Devolve404` | Última submissão de um aluno que nunca fez o quiz | 404 "Nenhuma submissão encontrada para o estudante com ID 1" |
+| `getLatestResults_UsaASubmissaoMaisRecente` | Resultados do aluno quando há várias submissões | Usa só a submissão mais recente (média 3,0 a partir de 2 e 4) |
+
 Para gerar o artefacto do backend (`backend/target/backend-*.jar`):
 
 ```bash
