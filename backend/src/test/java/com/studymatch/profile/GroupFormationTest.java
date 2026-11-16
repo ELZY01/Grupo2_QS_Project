@@ -35,6 +35,61 @@ class GroupFormationTest {
     }
 
     @Test
+    @DisplayName("Deve rejeitar estudantes nulos")
+    void shouldRejectNullStudents() {
+
+        List<StudentProfileEntry> students = new ArrayList<>();
+        students.add(null);
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> groupFormation.distribute(students)
+        );
+    }
+
+    @Test
+    @DisplayName("Deve rejeitar estudantes sem perfil")
+    void shouldRejectStudentsWithoutProfile() {
+
+        List<StudentProfileEntry> students = new ArrayList<>();
+
+        students.add(
+                new StudentProfileEntry(
+                        1L,
+                        "A001",
+                        "Estudante 1",
+                        null
+                )
+        );
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> groupFormation.distribute(students)
+        );
+    }
+
+    @Test
+    @DisplayName("Deve rejeitar estudantes sem numero de estudante")
+    void shouldRejectStudentsWithoutStudentNumber() {
+
+        List<StudentProfileEntry> students = new ArrayList<>();
+
+        students.add(
+                new StudentProfileEntry(
+                        1L,
+                        null,
+                        "Estudante 1",
+                        createProfile(3.0)
+                )
+        );
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> groupFormation.distribute(students)
+        );
+    }
+
+    @Test
     @DisplayName("Deve formar dois grupos de quatro estudantes")
     void shouldCreateTwoGroupsOfFourStudents() {
 
@@ -115,34 +170,76 @@ class GroupFormationTest {
         assertEquals(firstResult, secondResult);
     }
 
+    @Test
+    @DisplayName("Deve aceitar estudantes sem dados de competencias")
+    void shouldAcceptStudentsWithoutCompetencyData() {
+
+        List<StudentProfileEntry> students = createStudents(8);
+
+        StudentProfile emptyProfile = new StudentProfile(
+                0,
+                0.0,
+                List.of(
+                        new CompetencyLevel(
+                                "ORG",
+                                null,
+                                LevelOrigin.NO_DATA,
+                                0.0,
+                                null,
+                                null,
+                                List.of()
+                        )
+                )
+        );
+
+        students.set(
+                0,
+                new StudentProfileEntry(
+                        1L,
+                        "A001",
+                        "Estudante 1",
+                        emptyProfile
+                )
+        );
+
+        List<List<StudentProfileEntry>> groups =
+                groupFormation.distribute(students);
+
+        assertEquals(2, groups.size());
+        assertEquals(8, groups.stream().mapToInt(List::size).sum());
+    }
+
     private List<StudentProfileEntry> createStudents(int numberOfStudents) {
 
         List<StudentProfileEntry> students = new ArrayList<>();
 
         for (int i = 1; i <= numberOfStudents; i++) {
 
-            StudentProfile profile = new StudentProfile(
-                    0,
-                    1.0,
-                    List.of(
-                            competency("ORG", 3.0),
-                            competency("TEMPO", 3.0),
-                            competency("PROG", 3.0),
-                            competency("EQUIPA", 3.0)
-                    )
-            );
-
             students.add(
                     new StudentProfileEntry(
                             (long) i,
                             String.format("A%03d", i),
                             "Estudante " + i,
-                            profile
+                            createProfile(3.0)
                     )
             );
         }
 
         return students;
+    }
+
+    private StudentProfile createProfile(double level) {
+
+        return new StudentProfile(
+                0,
+                1.0,
+                List.of(
+                        competency("ORG", level),
+                        competency("TEMPO", level),
+                        competency("PROG", level),
+                        competency("EQUIPA", level)
+                )
+        );
     }
 
     private CompetencyLevel competency(String code, Double level) {

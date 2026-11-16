@@ -31,6 +31,8 @@ public class GroupFormation {
             return List.of();
         }
 
+        validateStudents(students);
+
         int numberOfGroups = (students.size() + MAX_GROUP_SIZE - 1)
                 / MAX_GROUP_SIZE;
 
@@ -73,6 +75,31 @@ public class GroupFormation {
         }
 
         return groups;
+    }
+
+    /**
+     * Valida os dados dos estudantes antes da distribuicao.
+     */
+    private void validateStudents(List<StudentProfileEntry> students) {
+
+        for (StudentProfileEntry student : students) {
+
+            if (student == null) {
+                throw new IllegalArgumentException(
+                        "A lista nao pode conter estudantes nulos.");
+            }
+
+            if (student.profile() == null) {
+                throw new IllegalArgumentException(
+                        "O perfil do estudante nao pode ser nulo.");
+            }
+
+            if (student.studentNumber() == null
+                    || student.studentNumber().isBlank()) {
+                throw new IllegalArgumentException(
+                        "O numero de estudante e obrigatorio.");
+            }
+        }
     }
 
     /**
