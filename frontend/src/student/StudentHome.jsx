@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { getProfile } from '../api/profileApi';
 import AcademicHistory from '../components/AcademicHistory';
 import CompetencyProfile from '../components/CompetencyProfile';
 import '../components/StudentRecords.css';
 import Mascot from '../mascot/Mascot.jsx';
 import { AREAS, pickMascot } from '../mascot/mascot.js';
+import { useTabBar } from './useTabBar.js';
 
 // O que cada área acrescenta ao Pix em cada nível (igual à folha de design).
 const UNLOCKS = {
@@ -39,13 +40,15 @@ export default function StudentHome({ studentId, onLogout }) {
   }, [load]);
 
   const mascot = profile ? pickMascot(profile.competencies) : null;
+  const navRef = useRef(null);
+  const bar = useTabBar(navRef, tab);
   const firstName = profile?.studentName?.split(' ')[0] ?? '';
 
   return (
     <div className="sx-home">
       <header className="sx-topbar">
         <p className="sx-brand">StudyMatch</p>
-        <nav className="sx-tabs" aria-label="A minha área">
+        <nav className="sx-tabs" aria-label="A minha área" ref={navRef}>
           {TABS.map((t) => (
             <button
               key={t.id}
@@ -57,13 +60,20 @@ export default function StudentHome({ studentId, onLogout }) {
               {t.label}
             </button>
           ))}
+          {bar && (
+            <span
+              className="sx-tab-bar"
+              aria-hidden="true"
+              style={{ width: bar.width, transform: `translateX(${bar.left}px)` }}
+            />
+          )}
         </nav>
         <button type="button" className="sx-link" onClick={onLogout}>
           Sair
         </button>
       </header>
 
-      <main className="sx-page">
+      <main className="sx-page view-enter" key={tab}>
         {error && (
           <p className="sx-error" role="alert">
             Não foi possível carregar o teu perfil ({error}).
@@ -96,18 +106,18 @@ export default function StudentHome({ studentId, onLogout }) {
                 <p className="sx-muted sx-small">Cada nível acrescenta um acessório ao Pix.</p>
               </div>
               <ul className="sx-area-list">
-                {Object.entries(AREAS).map(([code, area]) => {
+                {Object.entries(AREAS).map(([code, area], row) => {
                   const level = mascot.levels[code] ?? 1;
                   const next = level < 5 ? UNLOCKS[code][level + 1] : null;
                   return (
-                    <li key={code} className={`sx-area sx-area-${area.key}`}>
+                    <li key={code} className={`sx-area sx-area-${area.key}`} style={{ '--row': row }}>
                       <span className="sx-area-name">
                         <span className="sx-area-swatch" aria-hidden="true" />
                         {area.label}
                       </span>
                       <span className="sx-dots" role="img" aria-label={`Nível ${level} de 5`}>
                         {[1, 2, 3, 4, 5].map((n) => (
-                          <span key={n} className={n <= level ? 'on' : ''} />
+                          <span key={n} className={n <= level ? 'on' : ''} style={{ '--n': n }} />
                         ))}
                       </span>
                       <span className="sx-level mono">{level}/5</span>

@@ -31,8 +31,13 @@ export default function GroupResults({ generation }) {
       </p>
 
       <div className="group-grid">
-        {groups.map((group) => (
-          <article key={group.number} className="card group-card" aria-label={`Grupo ${group.number}`}>
+        {groups.map((group, i) => (
+          <article
+            key={group.number}
+            className="card group-card"
+            aria-label={`Grupo ${group.number}`}
+            style={{ '--i': i }}
+          >
             <header className="group-card-header">
               <h3>Grupo {group.number}</h3>
               <span className="group-average">média {formatDecimal(group.average)} / 5</span>

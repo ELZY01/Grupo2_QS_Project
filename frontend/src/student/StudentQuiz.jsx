@@ -18,6 +18,8 @@ const SCALE = [
 export default function StudentQuiz({ studentId, onDone }) {
   const [questions, setQuestions] = useState([]);
   const [index, setIndex] = useState(0);
+  // Para onde se andou: a pergunta nova entra desse lado (seguinte → direita, anterior → esquerda).
+  const [direction, setDirection] = useState('next');
   const [answers, setAnswers] = useState({});
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -48,10 +50,20 @@ export default function StudentQuiz({ studentId, onDone }) {
 
   const stage = useMemo(() => eggStage(answered, total), [answered, total]);
 
+  const goTo = (next) => {
+    setDirection(next < index ? 'prev' : 'next');
+    setIndex(next);
+  };
+
   const choose = (value) => {
     setAnswers((a) => ({ ...a, [question.id]: value }));
-    // Avança sozinho para a próxima pergunta por responder.
-    if (index < total - 1) setTimeout(() => setIndex((i) => Math.min(i + 1, total - 1)), 220);
+    // Avança sozinho para a próxima pergunta, depois de a escolha ter tempo de se ver.
+    if (index < total - 1) {
+      setTimeout(() => {
+        setDirection('next');
+        setIndex((i) => Math.min(i + 1, total - 1));
+      }, 220);
+    }
   };
 
   const submit = async () => {
@@ -114,38 +126,40 @@ export default function StudentQuiz({ studentId, onDone }) {
         </div>
 
         <div className="sx-card sx-question">
-          <div className="sx-question-meta">
-            <p className="sx-qcount" aria-label={`Pergunta ${index + 1} de ${total}`}>
-              {String(index + 1).padStart(2, '0')}/{String(total).padStart(2, '0')}
-            </p>
-            <p className="sx-chip">{question.competency?.name ?? 'Geral'}</p>
-          </div>
-          <h2>{question.text}</h2>
+          <div key={question.id} className={`sx-question-content enter-${direction}`}>
+            <div className="sx-question-meta">
+              <p className="sx-qcount" aria-label={`Pergunta ${index + 1} de ${total}`}>
+                {String(index + 1).padStart(2, '0')}/{String(total).padStart(2, '0')}
+              </p>
+              <p className="sx-chip">{question.competency?.name ?? 'Geral'}</p>
+            </div>
+            <h2>{question.text}</h2>
 
-          <div className="sx-scale" role="radiogroup" aria-label={question.text}>
-            {SCALE.map((opt) => (
-              <button
-                key={opt.value}
-                type="button"
-                role="radio"
-                aria-checked={answers[question.id] === opt.value}
-                className={answers[question.id] === opt.value ? 'selected' : ''}
-                onClick={() => choose(opt.value)}
-              >
-                <strong>{opt.value}</strong>
-                <span>{opt.label}</span>
-              </button>
-            ))}
+            <div className="sx-scale" role="radiogroup" aria-label={question.text}>
+              {SCALE.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  role="radio"
+                  aria-checked={answers[question.id] === opt.value}
+                  className={answers[question.id] === opt.value ? 'selected' : ''}
+                  onClick={() => choose(opt.value)}
+                >
+                  <strong>{opt.value}</strong>
+                  <span>{opt.label}</span>
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="sx-quiz-nav">
-            <button type="button" onClick={() => setIndex((i) => i - 1)} disabled={index === 0}>
+            <button type="button" onClick={() => goTo(index - 1)} disabled={index === 0}>
               Anterior
             </button>
             {index < total - 1 ? (
               <button
                 type="button"
-                onClick={() => setIndex((i) => i + 1)}
+                onClick={() => goTo(index + 1)}
                 disabled={answers[question.id] == null}
               >
                 Seguinte

@@ -125,7 +125,7 @@ function CompetencyItem({ competency: c, quizCompleted }) {
   const width = noData ? 0 : Math.max(0, Math.min(100, (c.level / 5) * 100));
 
   return (
-    <li className="competency">
+    <li className={`competency competency-area-${c.code?.toLowerCase()}`}>
       <details>
         <summary>
           <span className="competency-name">{c.name}</span>
