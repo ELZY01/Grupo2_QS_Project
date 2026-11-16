@@ -97,6 +97,14 @@ class SecurityAccessTest {
     }
 
     @Test
+    void aStudentIdThatIsNotANumberIsDenied() throws Exception {
+        Registered ana = register();
+
+        mvc.perform(auth(get("/api/students/abc"), ana.token)).andExpect(status().isForbidden());
+        mvc.perform(auth(get("/api/students/abc/profile"), ana.token)).andExpect(status().isForbidden());
+    }
+
+    @Test
     void aStudentCannotChangeEnrollmentsOrOtherStudents() throws Exception {
         Registered ana = register();
         Registered rui = register();
