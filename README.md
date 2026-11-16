@@ -155,6 +155,62 @@ Para gerar o artefacto do backend (`backend/target/backend-*.jar`):
 cd backend && ./mvnw clean package   # Windows: mvnw.cmd clean package
 ```
 
+#### Testes da autenticação e das atribuições (Issue #122)
+
+Testes que cobrem os ramos que faltavam no acesso aos dados dos estudantes, no login e nas atribuições feitas pelo admin. São testes unitários com Mockito, exceto o `SecurityAccessTest`, que arranca o backend completo com a base H2.
+
+| Classe | Antes (linhas / ramos) | Depois (linhas / ramos) |
+|---|---|---|
+| `StudentAccess` | 85,7% / 60,0% | **100% / 100%** |
+| `AuthService` | 94,6% / 66,7% | **100% / 87,5%** |
+| `CourseUnitAssignmentService` | 86,8% / 65,4% | **100% / 96,2%** |
+| `SecurityConfig` | 87,7% / 50,0% | **100%** / 50,0% |
+
+No `SecurityConfig` fica por cobrir um único ramo: o `parseId` receber `null`. Isso não acontece na prática, porque a regra só se aplica a URLs com o `{studentId}`. Com estes testes, a cobertura do projeto passou de 78,7% para 80,4% nas linhas e de 69,5% para 76,1% nos ramos.
+
+**`StudentAccessTest`** (`security/`): quem pode ver e alterar os dados de um estudante (RN05, RN16).
+
+| Teste | O que verifica | Resultado esperado |
+|---|---|---|
+| `currentUserIsNullWithoutASession` | Pedido sem sessão | Não há utilizador atual (`null`) |
+| `currentUserIsNullWhenThePrincipalIsNotAnAuthenticatedUser` | Sessão cujo utilizador não é uma conta do StudyMatch | Não há utilizador atual (`null`) |
+| `currentUserReturnsTheLoggedInUser` | Sessão de um aluno | Devolve o aluno da sessão |
+| `nobodySeesAStudentWithoutASessionOrWithoutAnId` | Ver um aluno sem sessão, ou sem indicar o ID | Acesso recusado, sem consultar as UCs do docente |
+| `theAdminSeesEveryStudent` | O admin a ver alunos diferentes | Acesso permitido a todos |
+| `aStudentOnlySeesTheirOwnData` | Um aluno a ver os seus dados e os de outro | Só vê os seus |
+| `aTeacherOnlySeesStudentsOfTheirUnits` | Um docente a ver um aluno da sua UC e um de fora | Só vê o aluno da sua UC |
+| `onlyTheAdminAndTheStudentThemselvesCanEdit` | Alterar dados como admin, como o próprio aluno, como outro aluno e sem sessão | Só o admin e o próprio aluno podem alterar |
+| `aTeacherCannotEditEvenAStudentOfTheirUnit` | Um docente a alterar dados de um aluno | Recusado, mesmo que o aluno esteja na sua UC |
+| `isSelfOnlyForTheStudentWithTheSameId` | "É o próprio aluno?" com o ID certo, sem ID, sem sessão e para o admin | Só é verdade para o aluno com o mesmo ID |
+
+**`AuthServiceTest`** (`service/`): testes novos do login, do registo e do logout.
+
+| Teste | O que verifica | Resultado esperado |
+|---|---|---|
+| `aLoginWithoutDataIsRejectedWithoutLookingForTheAccount` | Login sem utilizador nem palavra-passe | 401, sem procurar a conta na base de dados |
+| `aStudentWithoutAnAccountCannotLogInWithTheEmail` | Aluno que existe mas ainda não tem conta a entrar com o email | 401 |
+| `anEmptyRegistrationIsRejected` | Registo sem dados | 400 e o aluno não é criado |
+| `aRegistrationIsRejectedWhenTheStudentNumberAlreadyHasAnAccount` | Registo com um número de estudante que já tem conta | 409 e a conta não é guardada |
+| `logoutInvalidatesTheToken` | Terminar a sessão | O token deixa de ser válido |
+
+**`CourseUnitAssignmentServiceTest`** (`service/`): testes novos das atribuições do admin (R1, R2).
+
+| Teste | O que verifica | Resultado esperado |
+|---|---|---|
+| `listsTheTeacherAccounts` | Listar as contas de docente | Devolve os docentes com o utilizador certo |
+| `aTeacherNeedsAUsernameAndAName` | Criar um docente sem dados, com o utilizador em branco ou sem nome | 400 e a conta não é guardada |
+| `nullIdsAreTreatedAsNotFound` | Pedidos com o ID da UC, do docente ou do aluno em falta | 404 |
+| `removesAnAssignedTeacherAndFailsIfNotAssigned` | Remover um docente associado à UC e um que não está | O primeiro é removido; o segundo dá 404 "Este docente não está associado a esta UC." |
+| `theAssignmentsListTheTeachersAndTheEnrolledStudents` | Consultar as atribuições de uma UC | Devolve o docente e o aluno inscritos |
+
+**`SecurityAccessTest`** (`security/`, backend completo) e **`SecurityConfigTest`** (`config/`): regras do Spring Security.
+
+| Teste | O que verifica | Resultado esperado |
+|---|---|---|
+| `aStudentIdThatIsNotANumberIsDenied` | Um aluno a pedir `/api/students/abc` e `/api/students/abc/profile` | 403 |
+| `loadsTheAccountWithItsHashAndRole` | Carregar uma conta da tabela `app_users` | Utilizador, hash da palavra-passe e role (`ROLE_DOCENTE`) certos |
+| `anUnknownUsernameIsNotFound` | Carregar um utilizador que não existe | `UsernameNotFoundException` |
+
 ## Documentação
 
 | Documento | Descrição |
