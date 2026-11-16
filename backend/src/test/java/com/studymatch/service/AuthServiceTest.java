@@ -176,6 +176,59 @@ class AuthServiceTest {
         assertTrue(encoder.matches("novaPass123", account.getPasswordHash()));
     }
 
+    // --- Casos limite do login, do registo e do logout ---------------------
+
+    @Test
+    void aLoginWithoutDataIsRejectedWithoutLookingForTheAccount() {
+        var error = assertThrows(ResponseStatusException.class, () -> service.login(null));
+
+        assertEquals(HttpStatus.UNAUTHORIZED, error.getStatusCode());
+        verify(users, never()).findByUsernameIgnoreCase(anyString());
+        verify(students, never()).findByEmailIgnoreCaseOrStudentNumberIgnoreCase(anyString(), anyString());
+    }
+
+    @Test
+    void aStudentWithoutAnAccountCannotLogInWithTheEmail() {
+        when(users.findByUsernameIgnoreCase("ana@ulusofona.pt")).thenReturn(Optional.empty());
+        when(students.findByEmailIgnoreCaseOrStudentNumberIgnoreCase("ana@ulusofona.pt", "ana@ulusofona.pt"))
+                .thenReturn(Optional.of(student(7L, "a22001", "ana@ulusofona.pt")));
+        when(users.findByStudentId(7L)).thenReturn(Optional.empty());
+
+        var error = assertThrows(ResponseStatusException.class,
+                () -> service.login(new LoginRequest("ana@ulusofona.pt", "segredo123")));
+
+        assertEquals(HttpStatus.UNAUTHORIZED, error.getStatusCode());
+    }
+
+    @Test
+    void anEmptyRegistrationIsRejected() {
+        var error = assertThrows(ResponseStatusException.class, () -> service.register(null));
+
+        assertEquals(HttpStatus.BAD_REQUEST, error.getStatusCode());
+        verify(studentService, never()).createStudent(any());
+    }
+
+    @Test
+    void aRegistrationIsRejectedWhenTheStudentNumberAlreadyHasAnAccount() {
+        when(studentService.createStudent(any(Student.class))).thenReturn(student(7L, "a22001", "ana@ulusofona.pt"));
+        when(users.existsByUsernameIgnoreCase("a22001")).thenReturn(true);
+
+        var error = assertThrows(ResponseStatusException.class, () -> service.register(
+                new RegisterRequest("a22001", "Ana", "ana@ulusofona.pt", "LEI", 2, "segredo123")));
+
+        assertEquals(HttpStatus.CONFLICT, error.getStatusCode());
+        verify(users, never()).save(any());
+    }
+
+    @Test
+    void logoutInvalidatesTheToken() {
+        String token = tokens.issue(5L);
+
+        service.logout(token);
+
+        assertTrue(tokens.resolve(token).isEmpty());
+    }
+
     private static Student student(Long id, String number, String email) {
         return withStudentId(new Student(number, "Ana", email, "LEI", 2), id);
     }
