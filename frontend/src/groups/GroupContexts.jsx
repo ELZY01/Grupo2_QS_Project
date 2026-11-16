@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { createGroupContext, generateGroups, getGroupContexts, getGroups } from '../api/groupApi';
+import { createGroupContext, generateGroups, getGroupContexts, getGroups, swapStudents } from '../api/groupApi';
 import { getStudents } from '../api/studentApi';
 import GroupForming from '../mascot/GroupForming.jsx';
 import { useMinimumDuration } from '../mascot/useMinimumDuration.js';
@@ -114,6 +114,11 @@ export default function GroupContexts() {
     }
   };
 
+  // Ajuste manual (#75): o backend devolve a geração com as médias recalculadas.
+  const handleSwap = async (studentIdA, studentIdB) => {
+    setGeneration(await swapStudents(current.id, studentIdA, studentIdB));
+  };
+
   return (
     <section className="group-contexts">
       {loadError && (
@@ -220,7 +225,7 @@ export default function GroupContexts() {
           {showForming ? (
             <GroupForming />
           ) : (
-            generation && <GroupResults generation={generation} />
+            generation && <GroupResults generation={generation} onSwap={handleSwap} />
           )}
 
           {!showForming && !generation && !resultError && !current.generatedAt && (

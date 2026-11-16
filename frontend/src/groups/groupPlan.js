@@ -45,3 +45,26 @@ export function formatGap(value) {
   if (rounded === 0) return formatDecimal(0);
   return `${rounded > 0 ? '+' : '−'}${formatDecimal(Math.abs(rounded))}`;
 }
+
+/**
+ * Número do grupo onde está o aluno, ou null se não estiver em nenhum.
+ */
+export function groupOf(groups, studentId) {
+  const group = groups.find((g) => g.members.some((m) => m.studentId === studentId));
+  return group ? group.number : null;
+}
+
+/**
+ * Valida uma troca antes de a pedir ao backend (#75).
+ * Como é uma troca 1 por 1, os tamanhos dos grupos (4–5) não mudam.
+ *
+ * @returns {string | null} mensagem de erro, ou null quando a troca é válida
+ */
+export function swapError(groups, studentIdA, studentIdB) {
+  if (studentIdA == null || studentIdB == null) return 'Escolhe os dois alunos a trocar.';
+  const groupA = groupOf(groups, studentIdA);
+  const groupB = groupOf(groups, studentIdB);
+  if (groupA === null || groupB === null) return 'Aluno não encontrado nos grupos.';
+  if (groupA === groupB) return 'Escolhe alunos de grupos diferentes.';
+  return null;
+}

@@ -221,3 +221,23 @@
 .group-area-label {
   color: var(--muted);
 }
+
+/* Ajuste manual (#75) */
+.group-swap {
+  margin-top: var(--s-6);
+}
+
+.group-swap-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-3);
+  align-items: flex-end;
+}
+
+.group-swap-fields label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+  min-width: 192px;
+  flex: 1;
+}
