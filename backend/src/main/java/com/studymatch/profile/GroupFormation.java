@@ -44,14 +44,13 @@ public class GroupFormation {
         List<StudentProfileEntry> ordered = new ArrayList<>(students);
 
         ordered.sort(
-                Comparator.comparingDouble(this::calculateAverage)
-                        .thenComparing(StudentProfileEntry::studentNumber)
+                Comparator.comparing(
+                        this::calculateAverage,
+                        Comparator.nullsLast(Double::compareTo)
+                ).thenComparing(StudentProfileEntry::studentNumber)
         );
 
         List<List<StudentProfileEntry>> groups = new ArrayList<>();
-
-        int baseSize = students.size() / numberOfGroups;
-        int remainder = students.size() % numberOfGroups;
 
         for (int i = 0; i < numberOfGroups; i++) {
             groups.add(new ArrayList<>());
@@ -79,8 +78,10 @@ public class GroupFormation {
     /**
      * Calcula a media das competencias com dados disponiveis.
      * Competencias sem dados nao entram no calculo.
+     * Se nao existir qualquer competencia com dados,
+     * devolve null em vez de atribuir uma media de zero.
      */
-    private double calculateAverage(StudentProfileEntry student) {
+    private Double calculateAverage(StudentProfileEntry student) {
 
         List<CompetencyLevel> competencies =
                 student.profile().competencies();
@@ -97,7 +98,7 @@ public class GroupFormation {
         }
 
         if (count == 0) {
-            return 0.0;
+            return null;
         }
 
         return total / count;
