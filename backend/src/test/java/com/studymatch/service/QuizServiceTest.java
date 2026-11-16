@@ -12,6 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -322,5 +323,88 @@ class QuizServiceTest {
         when(questionRepository.findByQuizIdOrderByQuestionOrderAsc(1L)).thenReturn(perguntas);
 
         assertEquals(perguntas, quizService.getQuizQuestions(1L));
+    }
+
+    // ---------------------------------------------------------------
+    // Resultados por área
+    // ---------------------------------------------------------------
+
+    /** Resposta simulada com o valor dado, ligada a uma pergunta da competência indicada. */
+    private Answer resposta(Competency competencia, int valor) {
+        Question pergunta = new Question();
+        pergunta.setCompetency(competencia);
+        Answer answer = mock(Answer.class);
+        when(answer.getQuestion()).thenReturn(pergunta);
+        when(answer.getValue()).thenReturn(valor);
+        return answer;
+    }
+
+    @Test
+    void calculateResults_CalculaAMediaPorArea() {
+        Competency prog = new Competency();
+        prog.setName("Programação");
+        Competency org = new Competency();
+        org.setName("Organização");
+
+        List<Answer> respostas = List.of(
+                resposta(prog, 5), resposta(prog, 4), resposta(prog, 3),
+                resposta(org, 1), resposta(org, 2));
+        when(answerRepository.findBySubmissionId(5L)).thenReturn(respostas);
+
+        Map<String, Double> resultados = quizService.calculateResultsForSubmission(5L);
+
+        assertEquals(2, resultados.size());
+        assertEquals(4.0, resultados.get("Programação"), 1e-9);
+        assertEquals(1.5, resultados.get("Organização"), 1e-9);
+    }
+
+    @Test
+    void calculateResults_SemRespostas_DevolveMapaVazio() {
+        when(answerRepository.findBySubmissionId(5L)).thenReturn(List.of());
+
+        assertTrue(quizService.calculateResultsForSubmission(5L).isEmpty());
+    }
+
+    @Test
+    void getLatestSubmission_AlunoInexistente_Devolve404() {
+        when(studentRepository.existsById(99L)).thenReturn(false);
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+                () -> quizService.getLatestSubmissionForStudent(99L));
+
+        assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
+        verifyNoInteractions(quizSubmissionRepository);
+    }
+
+    @Test
+    void getLatestSubmission_AlunoSemSubmissoes_Devolve404() {
+        when(studentRepository.existsById(1L)).thenReturn(true);
+        when(quizSubmissionRepository.findTopByStudentIdOrderBySubmittedAtDesc(1L))
+                .thenReturn(Optional.empty());
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+                () -> quizService.getLatestSubmissionForStudent(1L));
+
+        assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
+        assertEquals("Nenhuma submissão encontrada para o estudante com ID 1", ex.getReason());
+    }
+
+    @Test
+    void getLatestResults_UsaASubmissaoMaisRecente() {
+        QuizSubmission recente = mock(QuizSubmission.class);
+        when(recente.getId()).thenReturn(42L);
+        Competency prog = new Competency();
+        prog.setName("Programação");
+
+        when(studentRepository.existsById(1L)).thenReturn(true);
+        when(quizSubmissionRepository.findTopByStudentIdOrderBySubmittedAtDesc(1L))
+                .thenReturn(Optional.of(recente));
+        List<Answer> respostas = List.of(resposta(prog, 2), resposta(prog, 4));
+        when(answerRepository.findBySubmissionId(42L)).thenReturn(respostas);
+
+        Map<String, Double> resultados = quizService.getLatestResultsForStudent(1L);
+
+        assertEquals(3.0, resultados.get("Programação"), 1e-9);
+        verify(answerRepository).findBySubmissionId(42L);
     }
 }
