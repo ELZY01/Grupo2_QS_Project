@@ -23,7 +23,7 @@ public interface GroupMemberRepository
             Integer generationNumber
     );
 
-    boolean existsByContextIdAndGenerationNumberAndStudentId(
+    boolean existsByContextIdAndGenerationNumberAndStudent_Id(
             Long contextId,
             Integer generationNumber,
             Long studentId
