@@ -3,11 +3,13 @@ package com.studymatch.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
@@ -24,6 +26,7 @@ import java.time.LocalDateTime;
         name = "student_groups",
         uniqueConstraints = {
                 @UniqueConstraint(
+                        name = "uq_sg_generation_group",
                         columnNames = {
                                 "context_id",
                                 "generation_number",
@@ -31,6 +34,7 @@ import java.time.LocalDateTime;
                         }
                 ),
                 @UniqueConstraint(
+                        name = "uq_sg_context_generation_id",
                         columnNames = {
                                 "context_id",
                                 "generation_number",
@@ -45,7 +49,7 @@ public class StudentGroup {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "context_id", nullable = false)
     private GroupContext context;
 
@@ -55,7 +59,7 @@ public class StudentGroup {
     @Column(name = "group_number", nullable = false)
     private Integer groupNumber;
 
-    @Column
+    @Column(name = "average")
     private Double average;
 
     @Column(name = "gap_to_others")
@@ -79,7 +83,13 @@ public class StudentGroup {
         this.groupNumber = groupNumber;
         this.average = average;
         this.gapToOthers = gapToOthers;
-        this.generatedAt = LocalDateTime.now();
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        if (generatedAt == null) {
+            generatedAt = LocalDateTime.now();
+        }
     }
 
     public Long getId() {

@@ -2,6 +2,7 @@
 package com.studymatch.model;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -20,6 +21,7 @@ import jakarta.persistence.UniqueConstraint;
 @Table(
         name = "group_context_students",
         uniqueConstraints = @UniqueConstraint(
+                name = "uq_gcs_context_student",
                 columnNames = {"context_id", "student_id"}
         )
 )
@@ -29,11 +31,11 @@ public class GroupContextStudent {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "context_id", nullable = false)
     private GroupContext context;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "student_id", nullable = false)
     private Student student;
 
