@@ -129,6 +129,18 @@ npm run dev
 
 O ficheiro `.env` define `VITE_API_URL=http://localhost:8080`, o endereço do backend. A aplicação abre em http://localhost:5173 e mostra o estado do backend (UP).
 
+#### Avanço automático do quiz do aluno (Issue #126)
+
+No quiz, ao escolher uma resposta, o ecrã passa sozinho para a pergunta seguinte ao fim de 220 ms. Esse avanço não era cancelado, o que dava dois problemas: duas respostas seguidas muito rápidas saltavam uma pergunta, e o avanço corria mesmo depois de o quiz sair do ecrã. Era isto que fazia o `npm test` mostrar o erro `window is not defined` no fim dos testes. Agora o avanço pendente é cancelado quando há uma nova escolha, quando o aluno usa "Anterior" ou "Seguinte" e quando o quiz fecha.
+
+Os três testes novos estão em `frontend/src/student/StudentQuiz.test.jsx` e usam timers simulados (`vi.useFakeTimers`). Sem a correção, os três falham.
+
+| Teste | O que verifica | Resultado esperado |
+|---|---|---|
+| does not skip a question when the student changes the answer quickly | Duas respostas à 1.ª pergunta antes dos 220 ms | O quiz avança só para a 2.ª pergunta |
+| stays on the previous question when the student goes back right after answering | Responder à 2.ª pergunta e carregar logo em "Anterior" | O quiz fica na 1.ª pergunta |
+| cancels the pending move when the quiz is closed | Responder e fechar o quiz antes dos 220 ms | Não fica nenhum timer pendente |
+
 ### Testes
 
 ```bash

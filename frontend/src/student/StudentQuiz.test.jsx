@@ -53,4 +53,53 @@ describe('StudentQuiz', () => {
     expect(url).toContain('/students/3/quiz-submissions');
     expect(JSON.parse(options.body).answers).toHaveLength(2);
   });
+
+  // #126: o avanço automático pendente tem de ser cancelado.
+  const THREE = [
+    ...QUESTIONS,
+    { id: 3, text: 'Gosto de programar', competency: { name: 'Programação' } },
+  ];
+
+  it('does not skip a question when the student changes the answer quickly', async () => {
+    vi.spyOn(globalThis, 'fetch').mockImplementation(() => json(THREE));
+    render(<StudentQuiz studentId={3} onDone={() => {}} />);
+    await screen.findByText('Planeio a semana');
+
+    vi.useFakeTimers();
+    fireEvent.click(screen.getByRole('radio', { name: /Bastante/ }));
+    fireEvent.click(screen.getByRole('radio', { name: /Sou mesmo eu/ }));
+    act(() => vi.advanceTimersByTime(300));
+
+    expect(screen.getByText('Entrego a horas')).toBeInTheDocument();
+    expect(screen.queryByText('Gosto de programar')).not.toBeInTheDocument();
+  });
+
+  it('stays on the previous question when the student goes back right after answering', async () => {
+    vi.spyOn(globalThis, 'fetch').mockImplementation(() => json(THREE));
+    render(<StudentQuiz studentId={3} onDone={() => {}} />);
+    await screen.findByText('Planeio a semana');
+
+    vi.useFakeTimers();
+    fireEvent.click(screen.getByRole('radio', { name: /Bastante/ }));
+    act(() => vi.advanceTimersByTime(300));
+    fireEvent.click(screen.getByRole('radio', { name: /Pouco/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Anterior' }));
+    act(() => vi.advanceTimersByTime(300));
+
+    expect(screen.getByText('Planeio a semana')).toBeInTheDocument();
+  });
+
+  it('cancels the pending move when the quiz is closed', async () => {
+    vi.spyOn(globalThis, 'fetch').mockImplementation(() => json(THREE));
+    const { unmount } = render(<StudentQuiz studentId={3} onDone={() => {}} />);
+    await screen.findByText('Planeio a semana');
+
+    vi.useFakeTimers();
+    fireEvent.click(screen.getByRole('radio', { name: /Bastante/ }));
+    expect(vi.getTimerCount()).toBe(1);
+
+    unmount();
+
+    expect(vi.getTimerCount()).toBe(0);
+  });
 });
