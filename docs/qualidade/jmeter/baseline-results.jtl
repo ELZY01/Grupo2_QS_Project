@@ -1,0 +1,21 @@
+timeStamp,elapsed,label,responseCode,responseMessage,threadName,dataType,success,failureMessage,bytes,sentBytes,grpThreads,allThreads,URL,Latency,IdleTime,Connect
+1794920162487,240,GET Actuator Health,401,,1. Baseline (1 Utilizador) 1-1,text,false,,389,184,1,1,http://localhost:8080/actuator/health,229,0,39
+1794920162738,10,GET Actuator Health,401,,1. Baseline (1 Utilizador) 1-1,text,false,,389,184,1,1,http://localhost:8080/actuator/health,10,0,0
+1794920162749,10,GET Actuator Health,401,,1. Baseline (1 Utilizador) 1-1,text,false,,389,184,1,1,http://localhost:8080/actuator/health,9,0,0
+1794920162760,6,GET Actuator Health,401,,1. Baseline (1 Utilizador) 1-1,text,false,,389,184,1,1,http://localhost:8080/actuator/health,6,0,0
+1794920162768,7,GET Actuator Health,401,,1. Baseline (1 Utilizador) 1-1,text,false,,389,184,1,1,http://localhost:8080/actuator/health,6,0,0
+1794920162776,6,GET Actuator Health,401,,1. Baseline (1 Utilizador) 1-1,text,false,,389,184,1,1,http://localhost:8080/actuator/health,6,0,0
+1794920162784,5,GET Actuator Health,401,,1. Baseline (1 Utilizador) 1-1,text,false,,389,184,1,1,http://localhost:8080/actuator/health,5,0,0
+1794920162791,8,GET Actuator Health,401,,1. Baseline (1 Utilizador) 1-1,text,false,,389,184,1,1,http://localhost:8080/actuator/health,8,0,0
+1794920162800,10,GET Actuator Health,401,,1. Baseline (1 Utilizador) 1-1,text,false,,389,184,1,1,http://localhost:8080/actuator/health,10,0,0
+1794920162811,5,GET Actuator Health,401,,1. Baseline (1 Utilizador) 1-1,text,false,,389,184,1,1,http://localhost:8080/actuator/health,5,0,0
+1794920162817,4,GET Actuator Health,401,,1. Baseline (1 Utilizador) 1-1,text,false,,389,184,1,1,http://localhost:8080/actuator/health,4,0,0
+1794920162822,3,GET Actuator Health,401,,1. Baseline (1 Utilizador) 1-1,text,false,,389,184,1,1,http://localhost:8080/actuator/health,3,0,0
+1794920162826,5,GET Actuator Health,401,,1. Baseline (1 Utilizador) 1-1,text,false,,389,184,1,1,http://localhost:8080/actuator/health,4,0,0
+1794920162832,11,GET Actuator Health,401,,1. Baseline (1 Utilizador) 1-1,text,false,,389,184,1,1,http://localhost:8080/actuator/health,10,0,0
+1794920162844,4,GET Actuator Health,401,,1. Baseline (1 Utilizador) 1-1,text,false,,389,184,1,1,http://localhost:8080/actuator/health,4,0,0
+1794920162850,3,GET Actuator Health,401,,1. Baseline (1 Utilizador) 1-1,text,false,,389,184,1,1,http://localhost:8080/actuator/health,3,0,0
+1794920162854,5,GET Actuator Health,401,,1. Baseline (1 Utilizador) 1-1,text,false,,389,184,1,1,http://localhost:8080/actuator/health,5,0,0
+1794920162860,3,GET Actuator Health,401,,1. Baseline (1 Utilizador) 1-1,text,false,,389,184,1,1,http://localhost:8080/actuator/health,3,0,0
+1794920162864,3,GET Actuator Health,401,,1. Baseline (1 Utilizador) 1-1,text,false,,389,184,1,1,http://localhost:8080/actuator/health,3,0,0
+1794920162868,2,GET Actuator Health,401,,1. Baseline (1 Utilizador) 1-1,text,false,,389,184,1,1,http://localhost:8080/actuator/health,2,0,0
