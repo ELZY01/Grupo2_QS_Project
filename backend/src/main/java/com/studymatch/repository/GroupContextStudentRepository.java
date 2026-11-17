@@ -15,7 +15,10 @@ import java.util.List;
 public interface GroupContextStudentRepository
         extends JpaRepository<GroupContextStudent, Long> {
 
-    List<GroupContextStudent> findByContextId(Long contextId);
+    List<GroupContextStudent> findByContext_Id(Long contextId);
 
-    boolean existsByContextIdAndStudentId(Long contextId, Long studentId);
+    boolean existsByContext_IdAndStudent_Id(
+            Long contextId,
+            Long studentId
+    );
 }

@@ -22,9 +22,11 @@ import jakarta.persistence.UniqueConstraint;
         name = "group_members",
         uniqueConstraints = {
                 @UniqueConstraint(
+                        name = "uq_gm_group_student",
                         columnNames = {"group_id", "student_id"}
                 ),
                 @UniqueConstraint(
+                        name = "uq_gm_student_generation",
                         columnNames = {
                                 "context_id",
                                 "generation_number",
