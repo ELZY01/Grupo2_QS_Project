@@ -9,16 +9,23 @@ import java.util.List;
  *
  * <p>Ponto de partida: a distribuição feita pelo Elisio em {@code profile.GroupFormation},
  * trazida para o pacote {@code grouping} e adaptada ao {@link GroupCandidate}.
- * Neste passo o comportamento é o mesmo; as regras do ADR-003 entram nos passos seguintes.
+ *
+ * <p>Ordenação (ADR-003 D3 e D5): média do perfil da maior para a menor; empate pelo
+ * número de estudante; um aluno sem dados nenhuns entra com a média neutra 3,0.
  */
 public class SnakeGroupFormation {
 
     public static final int MIN_GROUP_SIZE = 4;
     public static final int MAX_GROUP_SIZE = 5;
 
+    /** Maior média primeiro; empate pelo número de estudante (único, logo determinístico). */
+    static final Comparator<GroupCandidate> BY_AVERAGE_DESC = Comparator
+            .comparingDouble(GroupCandidate::sortingAverage).reversed()
+            .thenComparing(GroupCandidate::studentNumber);
+
     /**
      * Distribui os alunos por grupos de 4 ou 5, ordenando-os pela média do perfil
-     * e aplicando uma distribuição em serpentina.
+     * (da maior para a menor) e aplicando uma distribuição em serpentina.
      */
     public List<List<GroupCandidate>> distribute(List<GroupCandidate> students) {
 
@@ -40,9 +47,7 @@ public class SnakeGroupFormation {
         }
 
         List<GroupCandidate> ordered = new ArrayList<>(students);
-        ordered.sort(Comparator
-                .comparing(SnakeGroupFormation::averageOrNull, Comparator.nullsLast(Double::compareTo))
-                .thenComparing(GroupCandidate::studentNumber));
+        ordered.sort(BY_AVERAGE_DESC);
 
         List<List<GroupCandidate>> groups = new ArrayList<>();
         for (int i = 0; i < numberOfGroups; i++) {
@@ -75,8 +80,4 @@ public class SnakeGroupFormation {
         }
     }
 
-    /** Média das competências com dados, ou {@code null} se o aluno não tem dados nenhuns. */
-    private static Double averageOrNull(GroupCandidate student) {
-        return student.average().isPresent() ? student.average().getAsDouble() : null;
-    }
 }

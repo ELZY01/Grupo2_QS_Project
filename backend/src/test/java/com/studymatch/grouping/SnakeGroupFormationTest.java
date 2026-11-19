@@ -141,7 +141,70 @@ class SnakeGroupFormationTest {
         assertEquals(8, groups.stream().mapToInt(List::size).sum());
     }
 
+    @Test
+    @DisplayName("O aluno com a maior média vai para o grupo 1 e a serpentina equilibra as médias")
+    void strongestStudentGoesToFirstGroup() {
+        // médias 5,0; 4,5; 4,0; ...; 1,5 (alunos 1 a 8, por ordem de entrada invertida)
+        List<GroupCandidate> students = new ArrayList<>();
+        for (int i = 8; i >= 1; i--) {
+            students.add(student(i, 5.0 - (i - 1) * 0.5));
+        }
+
+        List<List<GroupCandidate>> groups = groupFormation.distribute(students);
+
+        // serpentina: G1, G2, G2, G1, G1, G2, G2, G1
+        assertEquals(List.of(1L, 4L, 5L, 8L), ids(groups.get(0)));
+        assertEquals(List.of(2L, 3L, 6L, 7L), ids(groups.get(1)));
+        assertEquals(3.25, averageOf(groups.get(0)), EPS);
+        assertEquals(3.25, averageOf(groups.get(1)), EPS);
+    }
+
+    @Test
+    @DisplayName("Com médias iguais, desempata pelo número de estudante")
+    void tieIsBrokenByStudentNumber() {
+        List<GroupCandidate> students = new ArrayList<>(createStudents(8));
+        java.util.Collections.reverse(students);
+
+        List<List<GroupCandidate>> groups = groupFormation.distribute(students);
+
+        assertEquals(List.of(1L, 4L, 5L, 8L), ids(groups.get(0)));
+        assertEquals(List.of(2L, 3L, 6L, 7L), ids(groups.get(1)));
+    }
+
+    @Test
+    @DisplayName("Um aluno sem dados entra na ordenação com a média neutra 3,0, não no fim")
+    void studentWithoutDataUsesNeutralAverage() {
+        // 9 alunos -> grupos de 5 e 4; posições G1 G2 G2 G1 G1 G2 G2 G1 G1
+        double[] averages = {5.0, 4.5, 4.0, 3.5, 3.2, 2.0, 1.5, 1.0};
+        List<GroupCandidate> students = new ArrayList<>();
+        for (int i = 0; i < averages.length; i++) {
+            students.add(student(i + 1, averages[i]));
+        }
+        Map<String, Double> noData = levels(null, null, null, null);
+        GroupCandidate withoutData = new GroupCandidate(99L, "A099", "Sem dados", noData);
+        students.add(withoutData);
+
+        List<List<GroupCandidate>> groups = groupFormation.distribute(students);
+
+        // 3,0 fica entre 3,2 e 2,0: 6.ª posição -> grupo 2 (no fim iria para o grupo 1)
+        assertTrue(groups.get(1).contains(withoutData), "O aluno sem dados devia estar no grupo 2.");
+    }
+
     // --- dados de teste --------------------------------------------------------
+
+    private static final double EPS = 1e-9;
+
+    static GroupCandidate student(int id, double level) {
+        return new GroupCandidate((long) id, String.format("A%03d", id), "Estudante " + id, levels(level));
+    }
+
+    static List<Long> ids(List<GroupCandidate> group) {
+        return group.stream().map(GroupCandidate::studentId).toList();
+    }
+
+    static double averageOf(List<GroupCandidate> group) {
+        return group.stream().mapToDouble(GroupCandidate::sortingAverage).average().orElseThrow();
+    }
 
     static List<GroupCandidate> createStudents(int numberOfStudents) {
         List<GroupCandidate> students = new ArrayList<>();
