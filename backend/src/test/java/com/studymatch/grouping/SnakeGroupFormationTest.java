@@ -24,12 +24,15 @@ class SnakeGroupFormationTest {
 
     private final SnakeGroupFormation groupFormation = new SnakeGroupFormation();
 
+    /*
+     * Mudança de requisito (ADR-003 D1): no teste original uma lista vazia devolvia "sem grupos".
+     * O enunciado do Sprint 3 pede que configurações impossíveis sejam tratadas explicitamente,
+     * e 0 alunos é uma delas: agora dá erro, para a API responder 400 com uma mensagem clara.
+     */
     @Test
-    @DisplayName("Devolve uma lista vazia quando não há estudantes")
-    void shouldReturnEmptyListWhenThereAreNoStudents() {
-        List<List<GroupCandidate>> groups = groupFormation.distribute(List.of());
-
-        assertTrue(groups.isEmpty());
+    @DisplayName("Sem estudantes, a configuração é impossível (antes devolvia uma lista vazia)")
+    void shouldRejectEmptyStudentList() {
+        assertThrows(ImpossibleGroupConfigurationException.class, () -> groupFormation.distribute(List.of()));
     }
 
     @Test
@@ -86,7 +89,60 @@ class SnakeGroupFormationTest {
     void shouldRejectImpossibleNumberOfStudents() {
         List<GroupCandidate> students = createStudents(6);
 
-        assertThrows(IllegalArgumentException.class, () -> groupFormation.distribute(students));
+        assertThrows(ImpossibleGroupConfigurationException.class, () -> groupFormation.distribute(students));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {0, 1, 2, 3, 6, 7, 11})
+    @DisplayName("Sem divisão em grupos de 4 ou 5: configuração impossível")
+    void impossibleSizes(int n) {
+        assertThrows(ImpossibleGroupConfigurationException.class, () -> SnakeGroupFormation.planSizes(n));
+    }
+
+    @Test
+    @DisplayName("Tamanhos dos grupos, com os grupos de 5 primeiro")
+    void plannedSizes() {
+        assertEquals(List.of(4), SnakeGroupFormation.planSizes(4));
+        assertEquals(List.of(5), SnakeGroupFormation.planSizes(5));
+        assertEquals(List.of(4, 4), SnakeGroupFormation.planSizes(8));
+        assertEquals(List.of(5, 4), SnakeGroupFormation.planSizes(9));
+        assertEquals(List.of(5, 5), SnakeGroupFormation.planSizes(10));
+        assertEquals(List.of(4, 4, 4), SnakeGroupFormation.planSizes(12));
+        assertEquals(List.of(5, 5, 5, 4, 4), SnakeGroupFormation.planSizes(23));
+    }
+
+    @Test
+    @DisplayName("Fronteira: 11 alunos é impossível, 12 já dá 4 + 4 + 4")
+    void boundaryElevenAndTwelve() {
+        assertThrows(ImpossibleGroupConfigurationException.class, () -> SnakeGroupFormation.planSizes(11));
+        assertEquals(List.of(4, 4, 4), SnakeGroupFormation.planSizes(12));
+    }
+
+    @Test
+    @DisplayName("A mensagem de erro diz quantos alunos há")
+    void impossibleMessageNamesTheCount() {
+        ImpossibleGroupConfigurationException error = assertThrows(
+                ImpossibleGroupConfigurationException.class, () -> SnakeGroupFormation.planSizes(7));
+
+        assertEquals("Com 7 alunos não é possível formar grupos de 4 ou 5.", error.getMessage());
+    }
+
+    @Test
+    @DisplayName("Rejeita o mesmo aluno duas vezes")
+    void shouldRejectDuplicatedStudents() {
+        List<GroupCandidate> students = createStudents(8);
+        students.set(7, student(1, 3.0));
+
+        assertThrows(ImpossibleGroupConfigurationException.class, () -> groupFormation.distribute(students));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {4, 5, 8, 9, 13, 14, 18, 23, 24})
+    @DisplayName("A serpentina produz exatamente os tamanhos planeados")
+    void distributionMatchesPlannedSizes(int n) {
+        List<List<GroupCandidate>> groups = groupFormation.distribute(createStudents(n));
+
+        assertEquals(SnakeGroupFormation.planSizes(n), groups.stream().map(List::size).toList());
     }
 
     @ParameterizedTest
