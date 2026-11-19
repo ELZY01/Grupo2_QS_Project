@@ -814,6 +814,56 @@ No `SecurityConfig` fica por cobrir um único ramo: o `parseId` receber `null`. 
 | `loadsTheAccountWithItsHashAndRole` | Carregar uma conta da tabela `app_users` | Utilizador, hash da palavra-passe e role (`ROLE_DOCENTE`) certos |
 | `anUnknownUsernameIsNotFound` | Carregar um utilizador que não existe | `UsernameNotFoundException` |
 
+#### Regras e estatísticas dos grupos de uma UC (Issue #106)
+
+Primeira parte da #106: as regras de criar e editar grupos à mão (R4, R5) e as estatísticas por grupo (R6). Estão no pacote `grouping`, em Java puro, sem Spring nem base de dados. Assim o service dos grupos (#69) só tem de ir buscar os dados aos repositórios e chamar estas classes, e a UI não fica presa ao algoritmo.
+
+- `GroupMembershipRules.requireTeacherOfUnit`: a UC tem de ser do docente. Se não for, dá `GroupAccessDeniedException` (o service responde **403**).
+- `GroupMembershipRules.validateMembers`: valida a lista final de membros de um grupo. Os alunos não podem estar repetidos, têm de estar inscritos na UC e não podem estar noutro grupo do mesmo contexto, e o tamanho tem de respeitar os limites. Se alguma regra falhar, dá `GroupMembershipConflictException` (o service responde **409**).
+- `GroupSizeLimits`: o tamanho dos grupos é de 4 a 5 alunos por omissão e pode ser configurado por contexto.
+- `GroupStatistics.ofAll`: calcula, para cada grupo, o nº de membros, a média, a diferença para os outros grupos, se está equilibrado (|diferença| ≤ 0,5) e as lacunas (áreas sem ninguém com nível ≥ 3,5). Por competência (`AreaStatistics`) dá a média, o mínimo, o máximo, o nº de alunos fortes e a distribuição pelos níveis 1 a 5. A média do grupo usa as mesmas regras do algoritmo: um aluno sem dados conta como 3,0.
+
+São classes novas, por isso não há cobertura "antes".
+
+| Classe | Linhas | Ramos |
+|---|---|---|
+| `GroupMembershipRules` | **100%** (36/36) | **100%** (22/22) |
+| `GroupStatistics` | **100%** (50/50) | **100%** (32/32) |
+| `AreaStatistics` | **100%** (7/7) | **100%** (4/4) |
+| `GroupSizeLimits` | **100%** (8/8) | **100%** (8/8) |
+
+Com estes testes, a cobertura do projeto passou de 88,9% para 89,8% nas linhas e de 82,4% para 84,9% nos ramos.
+
+**`GroupMembershipRulesTest`** (`grouping/`, unitário): regras R4 e R5.
+
+| Teste | O que verifica | Resultado esperado |
+|---|---|---|
+| `aTeacherManagesGroupsOfTheirUnit` | Um docente a gerir grupos de uma UC sua | Aceite |
+| `aTeacherCannotManageGroupsOfAnotherUnit` | Um docente a gerir grupos de uma UC de outro docente, ou sem UC | 403 "Só pode gerir grupos das suas unidades curriculares." |
+| `aValidNewGroupIsAccepted` | Grupo novo com 4 e com 5 alunos inscritos e sem grupo | Aceite |
+| `aStudentNotEnrolledIsRejected` | Grupo com um aluno que não está inscrito na UC | 409 "O aluno 99 não está inscrito nesta UC." |
+| `aStudentAlreadyInAnotherGroupIsRejected` | Pôr num grupo novo (ou no grupo 2) um aluno que já está no grupo 1 do mesmo contexto | 409 "O aluno 4 já está no grupo 1 deste contexto." |
+| `editingAGroupKeepsItsOwnMembers` | Editar o grupo 1 mantendo os seus membros e juntando um aluno sem grupo | Aceite (os membros do próprio grupo não contam como duplicados) |
+| `repeatedOrNullStudentsAreRejected` | Lista com o mesmo aluno duas vezes, ou com um valor vazio | 409 "O aluno 3 aparece mais de uma vez no grupo." |
+| `sizesOutsideTheDefaultLimitsAreRejected` | Grupos de 3 e de 6 alunos com os limites de omissão | 409 "Um grupo tem de ter entre 4 e 5 alunos (este teria 3)." |
+| `sizeIsConfigurablePerContext` | Contexto com grupos de 2 a 3 alunos | Grupo de 2 aceite, grupo de 4 recusado |
+| `invalidLimitsAreRejected` | Limites de omissão, mínimo 0 e máximo menor do que o mínimo | Omissão 4–5; os limites inválidos dão erro |
+| `missingInputsAreProgrammingErrors` | Chamar as regras sem a lista de UCs, de alunos ou de limites | `NullPointerException` (erro do código, não do utilizador) |
+
+**`GroupStatisticsTest`** (`grouping/`, unitário): estatísticas por grupo (R6).
+
+| Teste | O que verifica | Resultado esperado |
+|---|---|---|
+| `countsMembersAndAverage` | Um grupo de 5 alunos com médias 4, 2, 3, 3 e 3 | 5 membros, média 3,0, diferença 0, equilibrado |
+| `areaStatistics` | ORG com níveis 5,0; 3,5; 1,0 e 2,4, e PROG com um aluno sem dados | ORG: média 2,975, mín. 1,0, máx. 5,0, 2 fortes, distribuição 1/1/0/1/1. PROG só conta os 3 alunos com dados |
+| `gapsAreAreasWithoutAStrongMember` | Grupo forte só em ORG (4,0) e EQUIPA (3,5); TEMPO no máximo 3,4 | Lacunas: TEMPO e PROG |
+| `anAreaWithoutDataIsEmpty` | Grupo em que ninguém tem dados em EQUIPA | Média, mín. e máx. vazios; EQUIPA aparece como "sem dados" e como lacuna |
+| `gapToOthersAndBalance` | Três grupos com médias 4,0; 3,0 e 3,5 | Diferenças +0,75, −0,75 e 0; só o terceiro está equilibrado |
+| `aGapOfExactlyHalfIsBalanced` | Dois grupos com médias 3,5 e 3,0 | Diferença 0,5, ainda equilibrado (limite incluído) |
+| `aStudentWithoutDataCountsAsNeutral` | Grupo com três alunos de nível 5 e um sem dados | Média do grupo (5 + 5 + 5 + 3) / 4 = 4,5; nas áreas só contam 3 alunos com dados |
+| `invalidInputIsRejected` | Sem competências, com um grupo vazio ou com um grupo em falta | Erro |
+| `noGroupsGivesAnEmptyList` | Contexto sem grupos | Lista vazia |
+
 ## Documentação
 
 | Documento | Descrição |
