@@ -20,10 +20,16 @@ import java.util.Set;
  * <p>Ordenação (ADR-003 D3 e D5): média do perfil da maior para a menor; empate pelo
  * número de estudante; um aluno sem dados nenhuns entra com a média neutra 3,0.
  *
+ * <p>Complementaridade (ADR-003 D4): depois da serpentina, faz trocas entre grupos que aumentam
+ * o nº de áreas com alguém forte (nível ≥ 3,5), desde que a diferença de médias fique ≤ 0,5.
+ *
  * <p>Explicação (ADR-003 D6): cada grupo traz a sua média, a diferença para os outros
  * grupos e o membro mais forte em cada área.
  */
 public class SnakeGroupFormation implements GroupFormation {
+
+    /** Tolerância nas comparações de médias (arredondamentos de vírgula flutuante). */
+    private static final double EPSILON = 1e-9;
 
     /** Maior média primeiro; empate pelo número de estudante (único, logo determinístico). */
     static final Comparator<GroupCandidate> BY_AVERAGE_DESC = Comparator
@@ -35,7 +41,88 @@ public class SnakeGroupFormation implements GroupFormation {
         if (competencyCodes == null || competencyCodes.isEmpty()) {
             throw new IllegalArgumentException("É preciso indicar pelo menos uma competência.");
         }
-        return explain(competencyCodes, distribute(candidates));
+        List<List<GroupCandidate>> groups = distribute(candidates);
+        return explain(competencyCodes, improveComplementarity(competencyCodes, groups));
+    }
+
+    /**
+     * Trocas entre grupos que aumentam a cobertura das áreas sem desequilibrar (ADR-003 D4).
+     *
+     * <p>Percorre os pares de alunos de grupos diferentes por ordem fixa e aceita a primeira troca
+     * que aumenta a cobertura total e mantém a diferença de médias ≤ 0,5 (ou não a piora, se a
+     * serpentina já a tiver ultrapassado). Repete até não haver melhoria. Termina sempre, porque
+     * cada troca aceite aumenta a cobertura, que tem um máximo. As trocas não mudam os tamanhos.
+     */
+    List<List<GroupCandidate>> improveComplementarity(List<String> competencyCodes,
+                                                      List<List<GroupCandidate>> groups) {
+        List<List<GroupCandidate>> current = new ArrayList<>();
+        for (List<GroupCandidate> group : groups) {
+            current.add(new ArrayList<>(group));
+        }
+
+        int coverage = totalCoverage(competencyCodes, current);
+        double gap = averageGap(current);
+        boolean improved = true;
+        while (improved) {
+            improved = false;
+            search:
+            for (int i = 0; i < current.size(); i++) {
+                for (int j = i + 1; j < current.size(); j++) {
+                    for (int a = 0; a < current.get(i).size(); a++) {
+                        for (int b = 0; b < current.get(j).size(); b++) {
+                            swap(current, i, a, j, b);
+                            int newCoverage = totalCoverage(competencyCodes, current);
+                            double newGap = averageGap(current);
+                            if (newCoverage > coverage && newGap <= Math.max(MAX_AVERAGE_GAP, gap) + EPSILON) {
+                                coverage = newCoverage;
+                                gap = newGap;
+                                improved = true;
+                                break search;
+                            }
+                            swap(current, i, a, j, b);
+                        }
+                    }
+                }
+            }
+        }
+        return current;
+    }
+
+    /** Nº de áreas (0 a nº de competências) em que o grupo tem pelo menos um aluno forte. */
+    static int coverage(List<String> competencyCodes, List<GroupCandidate> group) {
+        int covered = 0;
+        for (String code : competencyCodes) {
+            for (GroupCandidate member : group) {
+                Double level = member.level(code);
+                if (level != null && level >= STRONG_LEVEL) {
+                    covered++;
+                    break;
+                }
+            }
+        }
+        return covered;
+    }
+
+    private static int totalCoverage(List<String> competencyCodes, List<List<GroupCandidate>> groups) {
+        return groups.stream().mapToInt(group -> coverage(competencyCodes, group)).sum();
+    }
+
+    /** Diferença entre a maior e a menor média de grupo. */
+    static double averageGap(List<List<GroupCandidate>> groups) {
+        double highest = Double.NEGATIVE_INFINITY;
+        double lowest = Double.POSITIVE_INFINITY;
+        for (List<GroupCandidate> group : groups) {
+            double average = groupAverage(group);
+            highest = Math.max(highest, average);
+            lowest = Math.min(lowest, average);
+        }
+        return groups.isEmpty() ? 0 : highest - lowest;
+    }
+
+    private static void swap(List<List<GroupCandidate>> groups, int i, int a, int j, int b) {
+        GroupCandidate first = groups.get(i).get(a);
+        groups.get(i).set(a, groups.get(j).get(b));
+        groups.get(j).set(b, first);
     }
 
     /**
