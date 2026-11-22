@@ -1,3 +1,4 @@
+
 package com.studymatch.service;
 
 import com.studymatch.dto.ProfileResponse;
@@ -33,9 +34,8 @@ import java.util.stream.Collectors;
 /**
  * Constrói o perfil de competências de um estudante (Issue #45).
  *
- * Esta classe só recolhe os dados (estudante, inscrições, pesos e quiz)
- * e entrega-os ao ProfileCalculator, onde estão as regras do ADR-002.
- * O perfil é sempre calculado com os dados atuais: não é guardado (ADR-002, D9).
+ * Recolhe os dados e entrega-os ao ProfileCalculator.
+ * O perfil é sempre calculado com os dados atuais.
  */
 @Service
 public class ProfileService {
@@ -65,6 +65,26 @@ public class ProfileService {
         this.answerRepository = answerRepository;
     }
 
+    /**
+     * Devolve o perfil interno de um estudante.
+     * Utilizado por outros serviços, como a formação automática de grupos.
+     */
+    @Transactional(readOnly = true)
+    public StudentProfile getStudentProfile(Long studentId) {
+
+        // Verificar se o estudante existe.
+        studentRepository.findById(studentId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Estudante não encontrado."
+                ));
+
+        return calculateStudentProfile(studentId);
+    }
+
+    /**
+     * Devolve o perfil completo de um estudante para a API.
+     */
     @Transactional(readOnly = true)
     public ProfileResponse getProfile(Long studentId) {
 
@@ -74,75 +94,121 @@ public class ProfileService {
                         "Estudante não encontrado."
                 ));
 
-        // 1. Competências (pela ordem da base de dados).
-        List<Competency> competencies = competencyRepository.findAllByOrderByIdAsc();
-        List<String> codes = competencies.stream().map(Competency::getCode).toList();
+        StudentProfile profile = calculateStudentProfile(studentId);
 
-        // 2. Todas as tentativas do estudante (o calculador escolhe a melhor aprovada).
-        List<AcademicResult> results = enrollmentRepository
-                .findByStudentIdOrderByCourseUnitIdAscAttemptNumberAsc(studentId)
-                .stream()
-                .map(ProfileService::toAcademicResult)
-                .toList();
-
-        // 3. Pesos UC → competência.
-        List<CompetencyWeight> weights = courseUnitCompetencyRepository
-                .findAllWithCourseUnitAndCompetency()
-                .stream()
-                .map(cuc -> new CompetencyWeight(
-                        cuc.getCompetency().getCode(),
-                        cuc.getCourseUnit().getCode(),
-                        cuc.getWeight()))
-                .toList();
-
-        // 4. Resultado da submissão de quiz mais recente, por código de competência.
-        Optional<QuizSubmission> latestQuiz =
-                quizSubmissionRepository.findTopByStudentIdOrderBySubmittedAtDesc(studentId);
-        Map<String, Double> quizLevels = latestQuiz
-                .map(submission -> quizLevelsByCompetencyCode(submission.getId()))
-                .orElseGet(Map::of);
-
-        // 5. Regras do perfil (ADR-002).
-        StudentProfile profile = calculator.calculate(codes, results, weights, quizLevels);
+        List<Competency> competencies =
+                competencyRepository.findAllByOrderByIdAsc();
 
         Map<String, String> namesByCode = competencies.stream()
-                .collect(Collectors.toMap(Competency::getCode, Competency::getName));
+                .collect(Collectors.toMap(
+                        Competency::getCode,
+                        Competency::getName
+                ));
 
-        List<CompetencyProfile> competencyProfiles = profile.competencies().stream()
-                .map(level -> toCompetencyProfile(level, namesByCode.get(level.competencyCode())))
+        List<CompetencyProfile> competencyProfiles = profile.competencies()
+                .stream()
+                .map(level -> toCompetencyProfile(
+                        level,
+                        namesByCode.get(level.competencyCode())
+                ))
                 .toList();
+
+        boolean hasQuiz = quizSubmissionRepository
+                .findTopByStudentIdOrderBySubmittedAtDesc(studentId)
+                .isPresent();
 
         return new ProfileResponse(
                 student.getId(),
                 student.getName(),
                 profile.completedCourseUnits(),
                 profile.quizWeight(),
-                latestQuiz.isPresent(),
-                competencyProfiles);
+                hasQuiz,
+                competencyProfiles
+        );
+    }
+
+    /**
+     * Recolhe os dados e calcula o perfil interno do estudante.
+     */
+    private StudentProfile calculateStudentProfile(Long studentId) {
+
+        // 1. Obter as competências.
+        List<Competency> competencies =
+                competencyRepository.findAllByOrderByIdAsc();
+
+        List<String> codes = competencies.stream()
+                .map(Competency::getCode)
+                .toList();
+
+        // 2. Obter todas as tentativas académicas.
+        List<AcademicResult> results = enrollmentRepository
+                .findByStudentIdOrderByCourseUnitIdAscAttemptNumberAsc(studentId)
+                .stream()
+                .map(ProfileService::toAcademicResult)
+                .toList();
+
+        // 3. Obter os pesos das competências.
+        List<CompetencyWeight> weights = courseUnitCompetencyRepository
+                .findAllWithCourseUnitAndCompetency()
+                .stream()
+                .map(cuc -> new CompetencyWeight(
+                        cuc.getCompetency().getCode(),
+                        cuc.getCourseUnit().getCode(),
+                        cuc.getWeight()
+                ))
+                .toList();
+
+        // 4. Obter os resultados do quiz mais recente.
+        Optional<QuizSubmission> latestQuiz =
+                quizSubmissionRepository
+                        .findTopByStudentIdOrderBySubmittedAtDesc(studentId);
+
+        Map<String, Double> quizLevels = latestQuiz
+                .map(submission ->
+                        quizLevelsByCompetencyCode(submission.getId()))
+                .orElseGet(Map::of);
+
+        // 5. Calcular o perfil.
+        return calculator.calculate(codes, results, weights, quizLevels);
     }
 
     private static AcademicResult toAcademicResult(Enrollment enrollment) {
         return new AcademicResult(
                 enrollment.getCourseUnit().getCode(),
                 enrollment.getCourseUnit().getName(),
-                enrollment.getGrade());
+                enrollment.getGrade()
+        );
     }
 
-    /** Média das respostas (1–5) agrupadas pelo código da competência de cada pergunta. */
+    /**
+     * Calcula a média das respostas por competência.
+     */
     private Map<String, Double> quizLevelsByCompetencyCode(Long submissionId) {
+
         Map<String, int[]> sumAndCount = new HashMap<>();
+
         for (Answer answer : answerRepository.findBySubmissionId(submissionId)) {
             String code = answer.getQuestion().getCompetency().getCode();
+
             int[] acc = sumAndCount.computeIfAbsent(code, k -> new int[2]);
+
             acc[0] += answer.getValue();
             acc[1]++;
         }
+
         Map<String, Double> levels = new HashMap<>();
-        sumAndCount.forEach((code, acc) -> levels.put(code, (double) acc[0] / acc[1]));
+
+        sumAndCount.forEach((code, acc) ->
+                levels.put(code, (double) acc[0] / acc[1])
+        );
+
         return levels;
     }
 
-    private static CompetencyProfile toCompetencyProfile(CompetencyLevel level, String name) {
+    private static CompetencyProfile toCompetencyProfile(
+            CompetencyLevel level,
+            String name) {
+
         return new CompetencyProfile(
                 level.competencyCode(),
                 name,
@@ -151,6 +217,7 @@ public class ProfileService {
                 level.quizWeight(),
                 level.quizLevel(),
                 level.historyLevel(),
-                level.contributions());
+                level.contributions()
+        );
     }
 }
