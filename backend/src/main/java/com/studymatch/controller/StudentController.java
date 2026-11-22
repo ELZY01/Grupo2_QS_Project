@@ -1,7 +1,10 @@
+
 package com.studymatch.controller;
 
 import com.studymatch.model.Student;
 import com.studymatch.service.StudentService;
+
+import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,7 +39,7 @@ public class StudentController {
      */
     @PostMapping
     public ResponseEntity<Student> createStudent(
-            @RequestBody Student student) {
+            @Valid @RequestBody Student student) {
 
         Student createdStudent = studentService.createStudent(student);
 
@@ -80,7 +83,7 @@ public class StudentController {
     @PutMapping("/{id}")
     public ResponseEntity<Student> updateStudent(
             @PathVariable Long id,
-            @RequestBody Student student) {
+            @Valid @RequestBody Student student) {
 
         Student updatedStudent =
                 studentService.updateStudent(id, student);

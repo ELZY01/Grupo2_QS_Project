@@ -1,3 +1,4 @@
+
 package com.studymatch.service;
 
 import com.studymatch.model.Student;
@@ -32,9 +33,6 @@ public class StudentService {
      */
     public Student createStudent(Student student) {
 
-        // Verifica se os campos obrigatórios foram preenchidos.
-        validateStudent(student);
-
         // Impede a utilização de um email já registado.
         if (studentRepository.existsByEmail(student.getEmail())) {
             throw new ResponseStatusException(
@@ -52,7 +50,6 @@ public class StudentService {
         }
 
         // O identificador é gerado automaticamente pela base de dados.
-// Guardamos o novo estudante sem definir manualmente o ID.
         return studentRepository.save(student);
     }
 
@@ -83,9 +80,6 @@ public class StudentService {
         // Confirma que o estudante existe.
         Student student = getStudentById(id);
 
-        // Valida os novos dados.
-        validateStudent(updatedStudent);
-
         // Verifica se o email pertence a outro estudante.
         if (studentRepository.existsByEmailAndIdNot(
                 updatedStudent.getEmail(), id)) {
@@ -114,65 +108,5 @@ public class StudentService {
         student.setAcademicYear(updatedStudent.getAcademicYear());
 
         return studentRepository.save(student);
-    }
-
-    /**
-     * Verifica os campos obrigatórios do estudante.
-     */
-    private void validateStudent(Student student) {
-
-        if (student == null) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Os dados do estudante são obrigatórios."
-            );
-        }
-
-        if (student.getName() == null || student.getName().isBlank()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "O nome é obrigatório."
-            );
-        }
-
-        if (student.getEmail() == null || student.getEmail().isBlank()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "O email é obrigatório."
-            );
-        }
-
-        // Validação básica do formato do email.
-        if (!student.getEmail().matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "O formato do email é inválido."
-            );
-        }
-
-        if (student.getStudentNumber() == null
-                || student.getStudentNumber().isBlank()) {
-
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "O número de estudante é obrigatório."
-            );
-        }
-
-        if (student.getCourse() == null || student.getCourse().isBlank()) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "O curso é obrigatório."
-            );
-        }
-
-        if (student.getAcademicYear() == null
-                || student.getAcademicYear() < 1) {
-
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "O ano académico deve ser igual ou superior a 1."
-            );
-        }
     }
 }
