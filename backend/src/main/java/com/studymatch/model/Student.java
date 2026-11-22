@@ -7,6 +7,10 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * Representa um estudante registado no StudyMatch.
@@ -24,23 +28,29 @@ public class Student {
     private Long id;
 
     // Número institucional único do estudante.
+    @NotBlank(message = "O número de estudante é obrigatório.")
     @Column(name = "student_number", nullable = false, unique = true)
     private String studentNumber;
 
     // Nome completo do estudante.
+    @NotBlank(message = "O nome é obrigatório.")
     @Column(nullable = false)
     private String name;
 
     // Email institucional único.
+    @NotBlank(message = "O email é obrigatório.")
+    @Email(message = "O formato do email é inválido.")
     @Column(nullable = false, unique = true)
     private String email;
 
     // Curso frequentado pelo estudante.
-    // Nesta fase, guardamos o nome do curso diretamente.
+    @NotBlank(message = "O curso é obrigatório.")
     @Column(nullable = false)
     private String course;
 
     // Ano curricular atual do estudante.
+    @NotNull(message = "O ano académico é obrigatório.")
+    @Min(value = 1, message = "O ano académico deve ser igual ou superior a 1.")
     @Column(name = "academic_year", nullable = false)
     private Integer academicYear;
 
