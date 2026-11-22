@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.springframework.stereotype.Component;
 
 /**
  * Formação de grupos em serpentina (Issue #71, ADR-003).
@@ -26,6 +27,7 @@ import java.util.Set;
  * <p>Explicação (ADR-003 D6): cada grupo traz a sua média, a diferença para os outros
  * grupos e o membro mais forte em cada área.
  */
+@Component
 public class SnakeGroupFormation implements GroupFormation {
 
     /** Tolerância nas comparações de médias (arredondamentos de vírgula flutuante). */
