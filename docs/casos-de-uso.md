@@ -520,13 +520,21 @@ flowchart LR
 1. O docente vê só as UCs que lhe estão atribuídas.
 2. Escolhe uma UC e vê os alunos inscritos.
 3. Escolhe um aluno e vê as competências, as notas e o histórico.
+4. No separador *Grupos*, cria um contexto com alunos inscritos na UC, gera os grupos e vê as estatísticas de cada grupo (#106).
+5. Ajusta os grupos à mão: cria um grupo com alunos sem grupo, muda os membros de um grupo ou apaga-o.
+
+**Fluxos alternativos:**
+- **4a.** O nº de alunos não dá grupos de 4 ou 5 → 400 com a mensagem do algoritmo (ADR-003 D1).
+- **5a.** Um aluno já está noutro grupo do mesmo contexto, não está inscrito na UC, ou o grupo fica fora de 4–5 alunos → 409 com a regra que falhou.
 
 **Regras:**
 - R3: o Docente só vê as suas UCs e os alunos inscritos nelas.
-- R6: estatísticas por aluno a partir dos dados que já existem (perfil e histórico); estado vazio quando não há dados. As estatísticas por grupo e a gestão de grupos (R4, R5) dependem da formação de grupos (#68–#71).
+- R4: o Docente só gere contextos e grupos das suas UCs, e só com alunos inscritos nelas (403 noutra UC).
+- R5: um aluno não pode estar em dois grupos do mesmo contexto; grupos de 4 a 5 alunos (409).
+- R6: estatísticas por aluno a partir dos dados que já existem (perfil e histórico); estado vazio quando não há dados. Por grupo: nº de membros, média, diferença para os outros grupos, equilíbrio (≤ 0,5), lacunas e, por competência, média, mínimo, máximo, alunos fortes e distribuição pelos níveis 1 a 5.
 - R7: pedidos fora destas permissões devolvem 403; sem sessão, 401.
 
-**Conceitos de domínio:** Docente, Unidade curricular, Inscrição na UC, Perfil de competências.
+**Conceitos de domínio:** Docente, Unidade curricular, Inscrição na UC, Perfil de competências, Contexto de agrupamento, Grupo.
 
 ---
 

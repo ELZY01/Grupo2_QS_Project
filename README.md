@@ -152,7 +152,7 @@ Os testes do backend **não precisam das credenciais da base de dados**: usam um
 
 #### O que cada teste verifica
 
-O `main` tem 167 testes no backend e 92 no frontend. No backend há 135 métodos `@Test`. A diferença vem dos testes parametrizados, que correm uma vez por cada valor da lista.
+Depois da #106 há 319 testes no backend e 119 no frontend. No backend há 297 métodos `@Test`. A diferença vem dos testes parametrizados, que correm uma vez por cada valor da lista.
 
 Usamos quatro tipos de teste:
 
@@ -515,6 +515,27 @@ Os testes do frontend correm com `npm test`. A API é sempre simulada, por isso 
 </details>
 
 <details>
+<summary><code>api/groupApi.test.js</code> · 11 testes</summary>
+
+Pedidos dos grupos (#106): o formato do backend do admin (#69) e as rotas da área do docente.
+
+| Teste | O que verifica |
+|---|---|
+| shows the latest generation by default, with the groups in order | A lista de grupos de todas as gerações do #69 passa a uma geração (a mais recente), com os grupos por número |
+| opens an older generation | Pedir a geração 1 mostra só os grupos dela |
+| handles a context without groups | Um contexto sem grupos dá uma geração vazia, sem erro |
+| converts the groups of a context into one generation | `GET /api/group-contexts/7/groups` devolve a geração pedida |
+| converts the new generation | A resposta de `/generate` também é convertida |
+| reloads the groups after a swap to show the new averages | Depois da troca (#112) volta a pedir os grupos, por isso as médias novas vêm sempre do backend |
+| explains that the swap is not available yet when the endpoint does not exist | Enquanto o endpoint da troca não existir (404), aparece "A troca de alunos ainda não está disponível." |
+| uses the routes of the unit | Contextos, criar, gerar e consultar usam `/api/teacher/course-units/10/group-contexts` |
+| creates, edits and deletes groups with the chosen students | Criar (`POST`), editar (`PUT`) e apagar (`DELETE`) um grupo mandam os alunos escolhidos |
+| shows the message of the backend when a rule fails | Um 409 mostra a mensagem do backend (ex.: aluno já noutro grupo) |
+| uses a clear message for a unit of another teacher | Um 403 sem mensagem dá "Só podes gerir grupos das tuas unidades curriculares." |
+
+</details>
+
+<details>
 <summary><code>components/AcademicHistory.test.jsx</code> · 5 testes</summary>
 
 | Teste | O que verifica |
@@ -597,9 +618,9 @@ Os testes do frontend correm com `npm test`. A API é sempre simulada, por isso 
 </details>
 
 <details>
-<summary><code>groups/GroupContexts.test.jsx</code> · 12 testes</summary>
+<summary><code>groups/GroupContexts.test.jsx</code> · 14 testes</summary>
 
-Ecrã dos contextos e grupos (#74) e troca manual de alunos (#75).
+Ecrã dos contextos e grupos do admin (#74) e troca manual de alunos (#75).
 
 | Teste | O que verifica |
 |---|---|
@@ -608,6 +629,8 @@ Ecrã dos contextos e grupos (#74) e troca manual de alunos (#75).
 | shows the API error when the backend rejects the generation | Se o backend recusa gerar os grupos, aparece o erro |
 | shows the Pix animation for at least 2 s while generating | A animação aparece pelo menos 2 segundos enquanto gera |
 | opens a previous generation from the history | Abre uma geração antiga a partir do histórico |
+| switches between the generations of a context | Com várias gerações, os botões "Geração 2" e "Geração 1" abrem cada uma (#106) |
+| does not show the strongest per area when the backend does not send it | O endpoint do admin (#69) não manda o mais forte por área: a secção não aparece, em vez de dizer "sem dados" em todas as áreas (#106) |
 | shows members, average, strongest per area and the gap to the other groups | Cada grupo mostra membros, média, o mais forte por área e a diferença para os outros |
 | never shows the grades or levels of other students (RN26) | Nunca aparecem notas nem níveis de outros alunos (RN26) |
 | warns when the gap between groups is above the limit | Avisa quando a diferença entre grupos passa o limite |
@@ -619,7 +642,7 @@ Ecrã dos contextos e grupos (#74) e troca manual de alunos (#75).
 </details>
 
 <details>
-<summary><code>groups/groupPlan.test.js</code> · 11 testes</summary>
+<summary><code>groups/groupPlan.test.js</code> · 14 testes</summary>
 
 | Teste | O que verifica |
 |---|---|
@@ -629,11 +652,32 @@ Ecrã dos contextos e grupos (#74) e troca manual de alunos (#75).
 | explains the split or why it is impossible | O texto explica a divisão ou porque é impossível |
 | uses a comma and one decimal place | Os números aparecem com vírgula e uma casa decimal |
 | shows the sign of the gap | A diferença entre grupos mostra o sinal (+ ou −) |
+| rounds two opposite gaps to the same size (#106) | Dois grupos com −0,05 e +0,05 (com erro de vírgula flutuante) mostram −0,1 e +0,1, e não 0,0 e +0,1 |
 | finds the group of a student | Encontra o grupo de um aluno |
 | accepts two students from different groups | Aceita trocar alunos de grupos diferentes |
 | asks for both students | Pede os dois alunos antes de trocar |
 | rejects two students from the same group | Recusa trocar dois alunos do mesmo grupo |
 | rejects a student that is not in any group | Recusa um aluno que não está em nenhum grupo |
+| accepts groups of 4 and 5 students | Um grupo feito à mão com 4 ou 5 alunos é aceite (#106) |
+| rejects smaller and bigger groups with the chosen size | Com 3 ou 6 alunos aparece "Um grupo tem de ter entre 4 e 5 alunos (escolheste 3)." (#106) |
+
+</details>
+
+<details>
+<summary><code>groups/TeacherGroups.test.jsx</code> · 8 testes</summary>
+
+Grupos de uma UC na área do docente (#106). O ecrã é o mesmo do admin, com os pedidos da UC simulados.
+
+| Teste | O que verifica |
+|---|---|
+| opens a context without groups and creates a group with the unassigned students | Um contexto sem grupos abre na mesma, mostra os alunos sem grupo e deixa criar um grupo com 4 deles |
+| does not offer a new group without 4 students without a group | Com menos de 4 alunos sem grupo, a opção "Novo grupo" está desativada |
+| shows the statistics of each group (R6) | Cada grupo mostra se está equilibrado, as lacunas e, por área, a média, o mínimo e o máximo, os fortes e quantos alunos há em cada nível |
+| removes a student from a group and the student becomes unassigned | Tirar um aluno de um grupo de 5 chama a API e o aluno passa para "Sem grupo" |
+| checks the size before calling the backend | Um grupo com 3 alunos dá erro logo no ecrã e não chega à API |
+| shows the 409 message when the backend rejects the change | Se o backend recusa (409), aparece a mensagem dele |
+| deletes a group | Apagar um grupo chama a API e o grupo desaparece |
+| generates the groups of the unit and has no swap panel | Gera os grupos da UC; o docente não tem o painel de troca do admin (ajusta com o editor) |
 
 </details>
 
@@ -699,7 +743,7 @@ Ecrã dos contextos e grupos (#74) e troca manual de alunos (#75).
 | shows a clear empty state without units | Docente sem UCs vê uma mensagem clara |
 | shows a clear empty state for a unit without students | UC sem alunos mostra uma mensagem clara |
 | shows the 403 message from the backend | Um 403 do backend mostra a mensagem dele |
-| has a groups section with a clear empty state and a logout button | Tem a secção dos grupos, com estado vazio, e o botão de sair |
+| has a groups section with the contexts of the unit and a logout button (#106) | A secção dos grupos usa os pedidos da UC aberta, só oferece os alunos inscritos nela, e o botão de sair funciona |
 
 </details>
 
@@ -863,6 +907,91 @@ Com estes testes, a cobertura do projeto passou de 88,9% para 89,8% nas linhas e
 | `aStudentWithoutDataCountsAsNeutral` | Grupo com três alunos de nível 5 e um sem dados | Média do grupo (5 + 5 + 5 + 3) / 4 = 4,5; nas áreas só contam 3 alunos com dados |
 | `invalidInputIsRejected` | Sem competências, com um grupo vazio ou com um grupo em falta | Erro |
 | `noGroupsGivesAnEmptyList` | Contexto sem grupos | Lista vazia |
+
+#### Grupos de uma UC na área do docente (Issue #106, 2.ª parte)
+
+Segunda parte da #106: as regras e as estatísticas da 1.ª parte passam a estar ligadas à API e à área do docente. O docente cria contextos numa UC sua (US10), gera grupos (US11), vê as estatísticas de cada grupo (R6) e cria, edita ou apaga grupos à mão (R4, R5).
+
+**Base de dados.** O `V8__add_course_unit_to_group_contexts.sql` junta a coluna `course_unit_id` à tabela `group_contexts`. Aceita `NULL`, por isso os contextos do admin (#69) não mudam. Tem de ser corrido no Supabase antes de arrancar o backend (`ddl-auto=validate`). O `U8` reverte.
+
+**API** (`TeacherGroupService` e `TeacherGroupController`), em `/api/teacher/course-units/{id}/group-contexts`, só para o DOCENTE:
+
+| Pedido | O que faz | Erros |
+|---|---|---|
+| `GET` | Contextos da UC, com o nº de alunos e a geração atual | 403 UC de outro docente (R4), 404 UC que não existe |
+| `POST` | Cria um contexto com alunos inscritos na UC (US10) | 400 sem nome ou sem alunos, 409 aluno não inscrito ou repetido |
+| `POST /{contextId}/generate` | Gera os grupos com o algoritmo do #69/#71 (US11) | 400 configuração impossível |
+| `GET /{contextId}/groups` | Grupos da geração mais recente, estatísticas de cada um (R6) e alunos sem grupo | 404 contexto de outra UC |
+| `POST /{contextId}/groups` | Cria um grupo à mão com alunos sem grupo | 409 (R4, R5) |
+| `PUT /{contextId}/groups/{groupId}` | Muda os membros de um grupo; quem sai fica sem grupo | 409 (R4, R5) ou grupo de uma geração antiga |
+| `DELETE /{contextId}/groups/{groupId}` | Apaga o grupo; os alunos ficam sem grupo | 404 |
+
+Depois de cada alteração, a média e a diferença de cada grupo são recalculadas e guardadas, por isso o ecrã do admin mostra os mesmos valores. O `/api/group-contexts/**` passou a ser só do admin: esses endpoints não confirmam a UC, e um docente podia usá-los para gerir contextos de outra UC.
+
+**Ecrã.** Área do docente → separador *Grupos*. É o mesmo ecrã do admin (`GroupContexts`), mas com os pedidos da UC, só com os alunos inscritos nela, com as estatísticas por grupo (`GroupStats`) e com o ajuste manual (`GroupEditor`). O ecrã do admin passou a converter as respostas do #69 (uma lista com os grupos de todas as gerações) numa geração de cada vez, com botões para escolher a geração.
+
+| Classe | Antes (linhas / ramos) | Depois (linhas / ramos) |
+|---|---|---|
+| `TeacherGroupService` | (nova) | **100%** (177/177) / **100%** (52/52) |
+| `TeacherGroupController` | (nova) | **100%** (16/16) / sem ramos |
+| `GroupGenerationService` | 20,8% / 40,0% | **86,2% / 76,7%** |
+| `GroupContext` | 62,5% / 50,0% | **90,5%** / 50,0% |
+| `StudentGroup` | 78,9% / 50,0% | **95,5%** / 50,0% |
+
+O `GroupGenerationService` (#69) subiu porque o teste do fluxo completo gera grupos a sério na H2. Com estes testes, a cobertura do projeto passou de 84,7% para **92,4%** nas linhas e de 83,8% para **87,7%** nos ramos.
+
+**`TeacherGroupServiceTest`** (`service/`, unitário com Mockito): acesso, regras dos membros e estatísticas.
+
+| Teste | O que verifica | Resultado esperado |
+|---|---|---|
+| `listsTheContextsOfTheUnitWithTheStudentCountAndTheGeneration` | Listar os contextos de uma UC do docente | Nome, UC, 9 alunos e geração 2 |
+| `aUnitThatDoesNotExistGives404` | Pedir os contextos de uma UC que não existe | 404 |
+| `aTeacherCannotManageGroupsOfAnotherUnit` | Docente a criar um grupo numa UC que não é sua (R4) | 403 "Só pode gerir grupos das suas unidades curriculares." e nada é procurado nem guardado |
+| `aContextOfAnotherUnitIsNotFound` | Abrir um contexto que não é desta UC | 404 |
+| `createsAContextInTheUnitWithTheEnrolledStudents` | Criar um contexto com 5 alunos inscritos e o nome com espaços | Contexto na UC, nome sem espaços, 5 alunos, ainda sem geração |
+| `aContextNeedsANameAndStudents` | Criar sem nome, com nome em branco, sem alunos ou sem pedido | 400 e nada é guardado |
+| `aContextOnlyAcceptsEnrolledStudentsOnce` | Contexto com um aluno não inscrito, ou com o mesmo aluno duas vezes | 409 "O aluno 99 não está inscrito nesta UC." / "O aluno 1 aparece mais de uma vez no grupo." |
+| `generatingUsesTheAlgorithmAndReturnsTheStatistics` | Gerar os grupos | Chama a geração do #69 e devolve os 2 grupos da geração 1 |
+| `withoutGroupsEveryStudentIsUnassigned` | Contexto ainda sem grupos | Sem geração, os 9 alunos sem grupo, limite 0,5 |
+| `eachGroupHasItsStatistics` | Grupo 1 (5 alunos, ORG 4 e PROG 2) e grupo 2 (4 alunos, ORG 2 e PROG 5) | Médias 3,0 e 3,5, diferença −0,5 (equilibrado, limite incluído), lacunas PROG e ORG, mais forte em ORG "Aluno 1" |
+| `groupsAboveTheLimitAreNotBalanced` | Dois grupos com médias 5,0 e 1,0 | Diferença 4,0: nem o contexto nem o grupo 1 estão equilibrados |
+| `withoutCompetenciesTheStatisticsCannotBeCalculated` | Pedir estatísticas sem competências na base de dados | 400 |
+| `aStudentAlreadyInAnotherGroupOfTheContextIsRejected` | Pôr no grupo 2 o aluno 1, que já está no grupo 1 (R5) | 409 "O aluno 1 já está no grupo 1 deste contexto." e nada muda |
+| `aNewGroupWithStudentsThatAlreadyHaveAGroupIsRejected` | Grupo novo com alunos que já estão no grupo 2 | 409 "O aluno 6 já está no grupo 2 deste contexto." |
+| `aGroupWithAStudentNotEnrolledOrOutsideTheLimitsIsRejected` | Grupo com um aluno não inscrito, e grupo de 3 | 409 com a mensagem de cada regra |
+| `aGroupRequestNeedsTheListOfStudents` | Criar um grupo sem corpo ou sem a lista | 400 |
+| `aGroupOfAnotherContextIsNotFound` | Apagar um grupo de outro contexto, ou que não existe | 404 e nada é apagado |
+| `onlyTheLatestGenerationCanBeChanged` | Editar um grupo da geração 1 quando já há a geração 2 | 409 |
+| `theFirstGroupStartsGeneration1AndAddsMissingStudentsToTheContext` | Primeiro grupo de um contexto, com um aluno inscrito na UC que ainda não era elegível | Grupo 1 da geração 1; o aluno passa a ser elegível no contexto e os 5 membros são guardados |
+| `editingAGroupOnlyRemovesWhoLeavesAndAddsWhoEnters` | Tirar o aluno 5 do grupo 1 | Só o aluno 5 é apagado, ninguém é inserido, e as médias são guardadas |
+
+**`TeacherGroupControllerTest`** (`controller/`, web com o Spring Security).
+
+| Teste | O que verifica | Resultado esperado |
+|---|---|---|
+| `withoutASessionGives401` | Pedido sem sessão | 401 e o service nem é chamado |
+| `studentsCannotManageGroups` | Pedido com sessão de aluno | 403 |
+| `theAdminUsesTheGroupsWithoutUnitAndNotThisRoute` | Pedido com sessão de admin | 403 (o admin usa `/api/group-contexts`) |
+| `listsTheContextsOfTheUnit` | `GET` como docente | 200 com o nome, 9 alunos e a geração 1 |
+| `createsAContextWith201` | `POST` de um contexto | 201 |
+| `returnsTheGroupsWithTheirStatistics` | `GET .../groups` | JSON com o limite 0,5, os membros, as lacunas, as áreas com a distribuição, o mais forte e os alunos sem grupo |
+| `generatesCreatesEditsAndDeletesGroups` | `POST generate`, `POST`, `PUT` e `DELETE` de um grupo | 200, 201, 200 e 200 |
+| `aUnitOfAnotherTeacherGives403WithTheMessage` | O service recusa a UC (R4) | 403 com a mensagem |
+| `aBrokenMembershipRuleGives409WithTheMessage` | O service recusa os membros (R5) | 409 com `status` e `message` |
+| `anImpossibleConfigurationGives400WithTheMessage` | O algoritmo recusa 6 alunos | 400 com a mensagem |
+
+**`TeacherGroupFlowTest`** (`security/`, backend completo com a H2): pedidos reais, do login ao grupo editado.
+
+| Teste | O que verifica | Resultado esperado |
+|---|---|---|
+| `aTeacherCreatesGeneratesEditsAndDeletesTheGroupsOfTheirUnit` | O docente cria um contexto com 9 alunos inscritos, gera, tenta pôr um aluno em dois grupos, muda um aluno de grupo, apaga um grupo e cria outro | Grupos de 5 e 4 com estatísticas; 409 no aluno repetido; os tamanhos e os alunos sem grupo certos em cada passo; as médias do docente e do admin batem certo |
+| `aStudentNotEnrolledInTheUnitCannotJoinAContext` | Contexto com um aluno que não está inscrito na UC | 409 "O aluno … não está inscrito nesta UC." |
+| `anImpossibleNumberOfStudentsGives400` | Gerar grupos com 6 alunos | 400 com a mensagem do algoritmo |
+| `aTeacherCannotUseTheGroupsWithoutUnit` | Docente e admin em `GET /api/group-contexts` | 403 para o docente, 200 para o admin |
+
+Os testes do frontend estão em `groups/TeacherGroups.test.jsx`, `api/groupApi.test.js` e nos testes novos de `GroupContexts`, `groupPlan` e `TeacherApp` (ver a lista do frontend acima).
+
+**O que fica de fora:** a troca de dois alunos num só passo é a #112 (backend). Na área do docente, um aluno muda de grupo saindo de um e entrando no outro. O tamanho dos grupos fica em 4–5 (ADR-003 D1), porque o algoritmo só faz grupos de 4 e 5.
 
 ## Documentação
 
