@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { describePlan, formatDecimal, formatGap, groupOf, planGroups, swapError } from './groupPlan.js';
+import {
+  describePlan, formatDecimal, formatGap, groupOf, groupSizeError, planGroups, swapError,
+} from './groupPlan.js';
 
 describe('planGroups', () => {
   it('rejects the impossible configurations', () => {
@@ -40,6 +42,12 @@ describe('formatting', () => {
     expect(formatGap(-0.1)).toBe('−0,1');
     expect(formatGap(0.01)).toBe('0,0');
   });
+
+  it('rounds two opposite gaps to the same size (#106)', () => {
+    // Valores reais da API depois de uma edição: −0,05 e +0,05 com erro de vírgula flutuante.
+    expect(formatGap(-0.04999999999999982)).toBe('−0,1');
+    expect(formatGap(0.05000000000000071)).toBe('+0,1');
+  });
 });
 
 describe('swapError (#75)', () => {
@@ -67,5 +75,17 @@ describe('swapError (#75)', () => {
 
   it('rejects a student that is not in any group', () => {
     expect(swapError(groups, 1, 99)).toBe('Aluno não encontrado nos grupos.');
+  });
+});
+
+describe('groupSizeError (#106)', () => {
+  it('accepts groups of 4 and 5 students', () => {
+    expect(groupSizeError(4)).toBeNull();
+    expect(groupSizeError(5)).toBeNull();
+  });
+
+  it('rejects smaller and bigger groups with the chosen size', () => {
+    expect(groupSizeError(3)).toBe('Um grupo tem de ter entre 4 e 5 alunos (escolheste 3).');
+    expect(groupSizeError(6)).toBe('Um grupo tem de ter entre 4 e 5 alunos (escolheste 6).');
   });
 });

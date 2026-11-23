@@ -3,17 +3,43 @@ import { createGroupContext, generateGroups, getGroupContexts, getGroups, swapSt
 import { getStudents } from '../api/studentApi';
 import GroupForming from '../mascot/GroupForming.jsx';
 import { useMinimumDuration } from '../mascot/useMinimumDuration.js';
+import GroupEditor from './GroupEditor.jsx';
 import GroupResults from './GroupResults.jsx';
 import { describePlan, planGroups } from './groupPlan.js';
 import './groups.css';
 
 const formatDate = (value) => (value ? new Date(value).toLocaleString('pt-PT') : null);
 
+/** Pedidos do admin: contextos sem UC (#69). */
+const ADMIN_API = {
+  students: getStudents,
+  list: getGroupContexts,
+  create: createGroupContext,
+  generate: generateGroups,
+  groups: getGroups,
+  swap: swapStudents,
+};
+
+/** Texto curto de um contexto na lista: nº de alunos e estado dos grupos. */
+function describeContext(context) {
+  const parts = [];
+  if (context.studentCount != null) parts.push(`${context.studentCount} alunos`);
+  if (context.generatedAt) parts.push(`gerado em ${formatDate(context.generatedAt)}`);
+  else if (context.generationNumber) parts.push('grupos feitos à mão');
+  else parts.push('por gerar');
+  return parts.join(' · ');
+}
+
 /**
- * Área do administrador para os grupos (#74):
- * criar contexto, escolher os alunos elegíveis, gerar grupos e abrir gerações anteriores.
+ * Contextos e grupos: criar contexto, escolher os alunos elegíveis, gerar grupos e abrir gerações.
+ *
+ * - Admin (#74, por omissão): contextos sem UC e troca de alunos (#75).
+ * - Docente (#106, `manage`): contextos de uma UC, estatísticas por grupo (R6) e ajuste manual
+ *   dos grupos (criar, editar e apagar, R4/R5). O `api` vem de teacherGroupApi.
+ *
+ * @param {{ api?: object, manage?: boolean }} props
  */
-export default function GroupContexts() {
+export default function GroupContexts({ api = ADMIN_API, manage = false }) {
   const [students, setStudents] = useState([]);
   const [contexts, setContexts] = useState([]);
   const [loadError, setLoadError] = useState(null);
@@ -31,18 +57,18 @@ export default function GroupContexts() {
 
   const loadContexts = useCallback(async () => {
     try {
-      setContexts(await getGroupContexts());
+      setContexts(await api.list());
     } catch (error) {
       setLoadError(error.message);
     }
-  }, []);
+  }, [api]);
 
   useEffect(() => {
-    getStudents()
+    api.students()
       .then(setStudents)
       .catch((error) => setLoadError(error.message));
     loadContexts();
-  }, [loadContexts]);
+  }, [api, loadContexts]);
 
   const toggle = (id) => {
     setSelected((prev) => {
@@ -61,6 +87,12 @@ export default function GroupContexts() {
   const count = selected.size;
   const possible = planGroups(count) !== null;
 
+  const updateCurrent = (changes) => {
+    const updated = { ...current, ...changes };
+    setCurrent(updated);
+    setContexts((list) => list.map((c) => (c.id === updated.id ? updated : c)));
+  };
+
   const handleCreate = async (event) => {
     event.preventDefault();
     setFormError(null);
@@ -74,7 +106,8 @@ export default function GroupContexts() {
     }
     setCreating(true);
     try {
-      const created = await createGroupContext({ name: name.trim(), studentIds: [...selected] });
+      // O endpoint do admin não devolve o nº de alunos; já o sabemos.
+      const created = { studentCount: count, ...(await api.create({ name: name.trim(), studentIds: [...selected] })) };
       setName('');
       setSelected(new Set());
       setContexts((list) => [created, ...list.filter((c) => c.id !== created.id)]);
@@ -86,27 +119,36 @@ export default function GroupContexts() {
     }
   };
 
-  const openContext = async (context) => {
-    setCurrent(context);
-    setGeneration(null);
+  const showGroups = async (load) => {
     setResultError(null);
-    if (!context.generatedAt) return;
     try {
-      setGeneration(await getGroups(context.id));
+      setGeneration(await load());
     } catch (error) {
       setResultError(error.message);
     }
   };
 
+  const openContext = async (context) => {
+    setCurrent(context);
+    setGeneration(null);
+    setResultError(null);
+    // O docente abre sempre: mesmo sem geração, pode criar grupos à mão.
+    if (!manage && !context.generatedAt) return;
+    await showGroups(() => api.groups(context.id));
+  };
+
+  const openGeneration = (generationNumber) => showGroups(() => api.groups(current.id, generationNumber));
+
   const handleGenerate = async () => {
     setGenerating(true);
     setResultError(null);
     try {
-      const result = await generateGroups(current.id);
+      const result = await api.generate(current.id);
       setGeneration(result);
-      const updated = { ...current, generatedAt: result.generatedAt ?? new Date().toISOString() };
-      setCurrent(updated);
-      setContexts((list) => list.map((c) => (c.id === updated.id ? updated : c)));
+      updateCurrent({
+        generatedAt: result.generatedAt ?? new Date().toISOString(),
+        generationNumber: result.generationNumber,
+      });
     } catch (error) {
       setResultError(error.message);
     } finally {
@@ -114,10 +156,23 @@ export default function GroupContexts() {
     }
   };
 
-  // Ajuste manual (#75): o backend devolve a geração com as médias recalculadas.
+  // Ajuste manual do admin (#75): o backend devolve a geração com as médias recalculadas.
   const handleSwap = async (studentIdA, studentIdB) => {
-    setGeneration(await swapStudents(current.id, studentIdA, studentIdB));
+    setGeneration(await api.swap(current.id, studentIdA, studentIdB));
   };
+
+  // Ajuste manual do docente (#106): cada alteração devolve os grupos e as estatísticas novas.
+  // Os erros (409) sobem para o GroupEditor, que os mostra.
+  const handleEdit = async (request) => {
+    const result = await request();
+    setGeneration(result);
+    if (result.generationNumber !== current.generationNumber) {
+      updateCurrent({ generationNumber: result.generationNumber });
+    }
+  };
+
+  const hasGroups = generation?.groups?.length > 0;
+  const generations = generation?.generations ?? [];
 
   return (
     <section className="group-contexts">
@@ -143,7 +198,7 @@ export default function GroupContexts() {
           <fieldset className="group-students">
             <legend>Alunos elegíveis</legend>
             {students.length === 0 ? (
-              <p>Ainda não há estudantes registados.</p>
+              <p>{manage ? 'Ainda não há alunos inscritos nesta UC.' : 'Ainda não há estudantes registados.'}</p>
             ) : (
               <>
                 <label className="group-check group-check-all">
@@ -193,10 +248,7 @@ export default function GroupContexts() {
                     onClick={() => openContext(c)}
                   >
                     <span className="group-history-name">{c.name}</span>
-                    <span className="group-history-meta">
-                      {c.studentCount} alunos ·{' '}
-                      {c.generatedAt ? `gerado em ${formatDate(c.generatedAt)}` : 'por gerar'}
-                    </span>
+                    <span className="group-history-meta">{describeContext(c)}</span>
                   </button>
                 </li>
               ))}
@@ -211,24 +263,59 @@ export default function GroupContexts() {
             <div>
               <h2>{current.name}</h2>
               <p>
-                {current.studentCount} alunos
-                {current.generatedAt && ` · última geração em ${formatDate(current.generatedAt)}`}
+                {[
+                  current.studentCount != null && `${current.studentCount} alunos`,
+                  current.generatedAt && `última geração em ${formatDate(current.generatedAt)}`,
+                ].filter(Boolean).join(' · ')}
               </p>
             </div>
             <button type="button" className="btn-primary" onClick={handleGenerate} disabled={showForming}>
-              {current.generatedAt ? 'Gerar de novo' : 'Gerar grupos'}
+              {current.generatedAt || hasGroups ? 'Gerar de novo' : 'Gerar grupos'}
             </button>
           </header>
+
+          {!manage && generations.length > 1 && (
+            <div className="group-generations" role="group" aria-label="Gerações">
+              {generations.map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  className={n === generation.generationNumber ? 'active' : ''}
+                  aria-pressed={n === generation.generationNumber}
+                  onClick={() => openGeneration(n)}
+                >
+                  Geração {n}
+                </button>
+              ))}
+            </div>
+          )}
 
           {resultError && <p className="group-error" role="alert">{resultError}</p>}
 
           {showForming ? (
             <GroupForming />
           ) : (
-            generation && <GroupResults generation={generation} onSwap={handleSwap} />
+            generation && (
+              <>
+                {hasGroups || !manage ? (
+                  <GroupResults generation={generation} onSwap={manage ? undefined : handleSwap} />
+                ) : (
+                  <p>Ainda não há grupos. Carrega em “Gerar grupos” ou cria um grupo à mão.</p>
+                )}
+                {manage && (
+                  <GroupEditor
+                    key={`${current.id}-${generation.generationNumber}`}
+                    generation={generation}
+                    onCreate={(ids) => handleEdit(() => api.createGroup(current.id, ids))}
+                    onUpdate={(groupId, ids) => handleEdit(() => api.updateGroup(current.id, groupId, ids))}
+                    onDelete={(groupId) => handleEdit(() => api.deleteGroup(current.id, groupId))}
+                  />
+                )}
+              </>
+            )
           )}
 
-          {!showForming && !generation && !resultError && !current.generatedAt && (
+          {!manage && !showForming && !generation && !resultError && !current.generatedAt && (
             <p>Ainda não há grupos. Carrega em “Gerar grupos”.</p>
           )}
         </div>

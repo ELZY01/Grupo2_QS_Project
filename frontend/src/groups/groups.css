@@ -241,3 +241,121 @@
   min-width: 192px;
   flex: 1;
 }
+
+/* Gerações de um contexto (admin, #74) */
+.group-generations {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+
+.group-generations button.active {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+}
+
+/* Estatísticas por grupo na área do docente (#106, R6) */
+.group-grid-stats {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr));
+}
+
+.group-stats {
+  display: grid;
+  gap: var(--s-1);
+}
+
+.group-stats-summary,
+.group-gaps {
+  margin: 0;
+  font-size: 0.9em;
+}
+
+.group-stats-summary .ok,
+.group-gaps.ok {
+  color: var(--success);
+}
+
+.group-stats-summary .warn,
+.group-gaps.warn {
+  color: var(--warn);
+  font-weight: 600;
+}
+
+.group-stats-scroll {
+  overflow-x: auto;
+}
+
+.group-stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85em;
+  font-variant-numeric: tabular-nums;
+}
+
+.group-stats-table th,
+.group-stats-table td {
+  padding: 4px 6px;
+  border-bottom: 1px solid var(--line);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.group-stats-table th:first-child {
+  text-align: left;
+  font-weight: 500;
+}
+
+.group-stats-table thead th {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+/* Ajuste manual do docente (#106, R4/R5) */
+.group-editor {
+  display: grid;
+  gap: var(--s-3);
+  margin-top: var(--s-6);
+}
+
+.group-editor h3 {
+  margin: 0;
+}
+
+.group-unassigned {
+  margin: 0;
+  color: var(--muted);
+}
+
+.group-editor-target {
+  display: grid;
+  gap: var(--s-1);
+  max-width: 360px;
+  font-weight: 600;
+}
+
+.group-editor .group-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.group-editor .group-check input {
+  width: auto;
+  flex: none;
+  margin: 0;
+}
+
+.group-editor-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-3);
+}
+
+.group-delete {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+.group-delete:hover:not(:disabled) {
+  background: var(--danger-soft);
+}

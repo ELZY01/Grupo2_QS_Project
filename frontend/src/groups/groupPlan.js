@@ -41,7 +41,10 @@ export function formatDecimal(value) {
  * Diferença para os outros grupos, com sinal (+0,2 / −0,1 / 0,0).
  */
 export function formatGap(value) {
-  const rounded = Math.round(Number(value) * 10) / 10;
+  // Arredonda o valor absoluto (com uma pequena tolerância para os erros de vírgula flutuante),
+  // para dois grupos com −0,05 e +0,05 mostrarem −0,1 e +0,1, e não 0,0 e +0,1.
+  const n = Number(value);
+  const rounded = (Math.sign(n) * Math.round(Math.abs(n) * 10 + 1e-9)) / 10;
   if (rounded === 0) return formatDecimal(0);
   return `${rounded > 0 ? '+' : '−'}${formatDecimal(Math.abs(rounded))}`;
 }
@@ -67,4 +70,15 @@ export function swapError(groups, studentIdA, studentIdB) {
   if (groupA === null || groupB === null) return 'Aluno não encontrado nos grupos.';
   if (groupA === groupB) return 'Escolhe alunos de grupos diferentes.';
   return null;
+}
+
+/**
+ * Valida o tamanho de um grupo criado ou editado à mão (#106, R5), antes de o pedir ao backend.
+ *
+ * @param {number} size nº de alunos escolhidos
+ * @returns {string | null} mensagem de erro, ou null quando o tamanho é válido
+ */
+export function groupSizeError(size) {
+  if (size >= MIN_GROUP_SIZE && size <= MAX_GROUP_SIZE) return null;
+  return `Um grupo tem de ter entre ${MIN_GROUP_SIZE} e ${MAX_GROUP_SIZE} alunos (escolheste ${size}).`;
 }
