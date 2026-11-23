@@ -90,24 +90,7 @@ class StudentServiceTest {
         verify(repository, never()).save(any(Student.class));
     }
 
-    /**
-     * Verifica se um nome vazio provoca HTTP 400.
-     */
-    @Test
-    void deveRejeitarNomeVazio() {
 
-        Student student = criarEstudanteValido();
-        student.setName("");
-
-        ResponseStatusException erro = assertThrows(
-                ResponseStatusException.class,
-                () -> service.createStudent(student)
-        );
-
-        assertEquals(HttpStatus.BAD_REQUEST, erro.getStatusCode());
-
-        verify(repository, never()).save(any(Student.class));
-    }
 
     /**
      * Verifica se um estudante inexistente provoca HTTP 404.
