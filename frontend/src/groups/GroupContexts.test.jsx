@@ -149,6 +149,33 @@ describe('GroupContexts', () => {
     expect(groupApi.getGroups).toHaveBeenCalledWith(7);
     expect(screen.getByRole('button', { name: 'Gerar de novo' })).toBeInTheDocument();
   });
+
+  it('switches between the generations of a context', async () => {
+    groupApi.getGroupContexts.mockResolvedValue([
+      { id: 7, name: 'Projeto final', generatedAt: '2026-11-08T10:00:00Z', generations: [2, 1] },
+    ]);
+    groupApi.getGroups.mockImplementation(async (_id, n = 2) => ({ ...GENERATION, generationNumber: n, generations: [2, 1] }));
+    render(<GroupContexts />);
+
+    fireEvent.click(await screen.findByRole('button', { name: /Projeto final/ }));
+    expect(await screen.findByRole('button', { name: 'Geração 2' })).toHaveAttribute('aria-pressed', 'true');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Geração 1' }));
+
+    await waitFor(() => expect(groupApi.getGroups).toHaveBeenCalledWith(7, 1));
+    expect(await screen.findByRole('button', { name: 'Geração 1' })).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('does not show the strongest per area when the backend does not send it', async () => {
+    const withoutStrongest = {
+      ...GENERATION,
+      groups: GENERATION.groups.map((group) => ({ ...group, strongestByArea: undefined })),
+    };
+    render(<GroupResults generation={withoutStrongest} />);
+
+    expect(screen.queryByText('Mais forte por área')).toBeNull();
+    expect(screen.getByRole('article', { name: 'Grupo 1' })).toHaveTextContent('Aluno 1');
+  });
 });
 
 describe('GroupResults', () => {

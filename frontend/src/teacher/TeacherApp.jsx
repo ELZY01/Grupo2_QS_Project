@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { teacherGroupApi } from '../api/groupApi';
 import { getCourseUnitStudents, getMyCourseUnits } from '../api/teacherApi';
 import AcademicHistory from '../components/AcademicHistory';
 import CompetencyProfile from '../components/CompetencyProfile';
+import GroupContexts from '../groups/GroupContexts.jsx';
 import '../App.css';
 import './teacher.css';
 
@@ -13,9 +15,9 @@ const SECTIONS = [
 ];
 
 /**
- * Área do docente (R3, R6):
- * as suas UCs → alunos inscritos → estatísticas de cada aluno (perfil e histórico).
- * Os grupos ficam disponíveis quando o backend dos grupos estiver pronto (#68/#69).
+ * Área do docente (R3 a R6):
+ * as suas UCs → alunos inscritos → estatísticas de cada aluno (perfil e histórico),
+ * e os grupos da UC: contextos, geração, estatísticas por grupo e ajuste manual (#106).
  */
 export default function TeacherApp({ name, onLogout }) {
   const [units, setUnits] = useState(null);
@@ -108,19 +110,25 @@ export default function TeacherApp({ name, onLogout }) {
 
             {section === 'students' && <CourseUnitStudents key={current.courseUnit.id} courseUnitId={current.courseUnit.id} />}
             {section === 'groups' && (
-              <div className="card teacher-empty">
-                <h2>Grupos</h2>
-                <p>
-                  A criação e as estatísticas dos grupos ficam disponíveis quando a formação de grupos
-                  estiver pronta no backend.
-                </p>
-              </div>
+              <CourseUnitGroups key={current.courseUnit.id} courseUnitId={current.courseUnit.id} />
             )}
           </>
         )}
       </main>
     </div>
   );
+}
+
+/**
+ * Grupos de uma UC do docente (#106): o mesmo ecrã do admin, com os pedidos da UC,
+ * só com os alunos inscritos nela e com as estatísticas e o ajuste manual.
+ */
+function CourseUnitGroups({ courseUnitId }) {
+  const api = useMemo(
+    () => ({ ...teacherGroupApi(courseUnitId), students: () => getCourseUnitStudents(courseUnitId) }),
+    [courseUnitId],
+  );
+  return <GroupContexts api={api} manage />;
 }
 
 /**

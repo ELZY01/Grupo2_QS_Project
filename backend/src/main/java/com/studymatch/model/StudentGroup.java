@@ -119,4 +119,13 @@ public class StudentGroup {
     public LocalDateTime getGeneratedAt() {
         return generatedAt;
     }
+
+    /**
+     * Atualiza a média e a diferença para os outros grupos depois de o docente
+     * mudar os membros à mão (Issue #106).
+     */
+    public void updateAverages(Double average, Double gapToOthers) {
+        this.average = average;
+        this.gapToOthers = gapToOthers;
+    }
 }
