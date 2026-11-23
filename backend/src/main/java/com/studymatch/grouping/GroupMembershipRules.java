@@ -60,7 +60,7 @@ public final class GroupMembershipRules {
     }
 
     /** O mesmo aluno não pode aparecer duas vezes na lista (nem ser {@code null}). */
-    static void requireNoRepeated(Collection<Long> studentIds) {
+    public static void requireNoRepeated(Collection<Long> studentIds) {
         Set<Long> seen = new HashSet<>();
         for (Long id : studentIds) {
             if (id == null) {
@@ -73,7 +73,7 @@ public final class GroupMembershipRules {
     }
 
     /** R4: só alunos inscritos na UC. */
-    static void requireEnrolled(Collection<Long> studentIds, Set<Long> enrolledIds) {
+    public static void requireEnrolled(Collection<Long> studentIds, Set<Long> enrolledIds) {
         for (Long id : studentIds) {
             if (!enrolledIds.contains(id)) {
                 throw new GroupMembershipConflictException("O aluno " + id + " não está inscrito nesta UC.");

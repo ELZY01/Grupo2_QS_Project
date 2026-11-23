@@ -78,7 +78,9 @@ public class SecurityConfig {
                         // Áreas por role
                         .requestMatchers("/api/admin/**").hasRole(admin)
                         .requestMatchers("/api/teacher/**").hasRole(teacher)
-                        .requestMatchers("/api/group-contexts/**").hasAnyRole(admin, teacher)
+                        // Grupos sem UC: só o admin. O docente usa /api/teacher/course-units/{id}/group-contexts,
+                        // que confirma que a UC é dele (R4, Issue #106).
+                        .requestMatchers("/api/group-contexts/**").hasRole(admin)
 
                         // Estudantes
                         .requestMatchers(HttpMethod.GET, "/api/students").hasRole(admin)
