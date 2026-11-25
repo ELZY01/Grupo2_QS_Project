@@ -4,6 +4,7 @@ package com.studymatch.controller;
 import com.studymatch.dto.CreateGroupContextRequest;
 import com.studymatch.dto.GeneratedGroupResponse;
 import com.studymatch.dto.GroupContextResponse;
+import com.studymatch.grouping.ImpossibleGroupConfigurationException;
 import com.studymatch.service.GroupGenerationService;
 
 import org.springframework.http.HttpStatus;
@@ -11,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Controller responsável pela gestão e geração de grupos.
@@ -73,5 +75,16 @@ public class GroupContextController {
         return ResponseEntity.ok(
                 groupGenerationService.getGroups(id)
         );
+    }
+
+    /**
+     * Configuração impossível (ex.: 7 alunos) → 400 com a mensagem, como o frontend espera.
+     * Sem isto a exceção chegava ao cliente como 500 (Issue #113, ADR-003 D1).
+     * Mesmo formato dos erros do SecurityConfig e do TeacherGroupController.
+     */
+    @ExceptionHandler(ImpossibleGroupConfigurationException.class)
+    ResponseEntity<Map<String, Object>> impossibleConfiguration(ImpossibleGroupConfigurationException e) {
+        return ResponseEntity.badRequest()
+                .body(Map.of("status", HttpStatus.BAD_REQUEST.value(), "message", e.getMessage()));
     }
 }
