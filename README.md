@@ -1024,8 +1024,12 @@ Os detalhes estão no [CONTRIBUTING.md](CONTRIBUTING.md).
 | Bruna Costa | [@Bruninha9](https://github.com/Bruninha9) |
 | Francisco Jacinto | [@FranciscoJacinto7077](https://github.com/FranciscoJacinto7077) |
 
-## Estado atual — Sprint 2
+## Estado atual do projeto
 
-O Sprint 2 constrói o subsistema de **perfil do estudante**: gestão de estudantes, histórico académico, perfil de competências calculado a partir das notas, quiz de arranque a frio para alunos sem histórico e a **explicação do perfil** (funcionalidade da equipa). As regras e a sua justificação estão no [ADR-002](docs/decisions/ADR-002-perfil-e-cold-start.md). A formação automática de grupos fica para os próximos sprints.
+O projeto StudyMatch evoluiu desde a fundação do Sprint 1 e do subsistema de perfil do estudante desenvolvido no Sprint 2. Atualmente, inclui gestão de estudantes e histórico académico, cálculo de perfis de competências, quiz de arranque a frio, explicação dos perfis, autenticação, validação de dados e formação automática de grupos.
 
-O Sprint 1 foi a fundação do projeto: organização no GitHub, casos de uso, modelo de domínio, arquitetura e um esqueleto full-stack a funcionar (frontend → API → base de dados).
+A formação de grupos permite gerar grupos equilibrados, configurar contextos de agrupamento e consultar estatísticas. O algoritmo e as regras de equilíbrio estão documentados no [ADR-003](docs/decisions/ADR-003-formacao-de-grupos.md).
+
+As regras de cálculo dos perfis e o funcionamento do quiz de arranque a frio estão documentados no [ADR-002](docs/decisions/ADR-002-perfil-e-cold-start.md).
+
+O projeto inclui testes automatizados para o backend e frontend, bem como documentação técnica sobre arquitetura, casos de uso, segurança e decisões de desenvolvimento.
