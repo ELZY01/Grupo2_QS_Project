@@ -34,11 +34,23 @@ public class GroupContext {
     @Column(name = "generated_at")
     private LocalDateTime generatedAt;
 
+    /**
+     * UC a que o contexto pertence (Issue #106, R4). Fica vazio nos contextos
+     * criados pelo admin em /api/group-contexts.
+     */
+    @Column(name = "course_unit_id")
+    private Long courseUnitId;
+
     public GroupContext() {
     }
 
     public GroupContext(String name) {
         this.name = name;
+    }
+
+    public GroupContext(String name, Long courseUnitId) {
+        this.name = name;
+        this.courseUnitId = courseUnitId;
     }
 
     @PrePersist
@@ -70,5 +82,9 @@ public class GroupContext {
 
     public void setGeneratedAt(LocalDateTime generatedAt) {
         this.generatedAt = generatedAt;
+    }
+
+    public Long getCourseUnitId() {
+        return courseUnitId;
     }
 }

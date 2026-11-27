@@ -82,6 +82,15 @@ public record GroupStatistics(
         return result;
     }
 
+    /**
+     * Membro mais forte em cada área, com as mesmas regras do algoritmo (ADR-003 D6):
+     * empate pelo nº de estudante, e uma área sem dados no grupo fica de fora.
+     */
+    public static Map<String, GroupCandidate> strongestByArea(List<String> competencyCodes,
+                                                              List<GroupCandidate> group) {
+        return SnakeGroupFormation.strongestByArea(competencyCodes, group);
+    }
+
     /** Média, mínimo, máximo, nº de fortes e distribuição de uma competência no grupo. */
     static AreaStatistics area(String code, List<GroupCandidate> group) {
         Map<Integer, Integer> distribution = new LinkedHashMap<>();

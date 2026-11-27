@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { HttpError } from '../api/http';
 import TeacherApp from './TeacherApp.jsx';
@@ -6,6 +6,14 @@ import TeacherApp from './TeacherApp.jsx';
 vi.mock('../api/teacherApi', () => ({
   getMyCourseUnits: vi.fn(),
   getCourseUnitStudents: vi.fn(),
+}));
+vi.mock('../api/groupApi', () => ({
+  teacherGroupApi: vi.fn(),
+  createGroupContext: vi.fn(),
+  getGroupContexts: vi.fn(),
+  generateGroups: vi.fn(),
+  getGroups: vi.fn(),
+  swapStudents: vi.fn(),
 }));
 // As estatísticas reutilizam os componentes do perfil e do histórico (testados à parte).
 vi.mock('../components/CompetencyProfile', () => ({
@@ -18,6 +26,7 @@ vi.mock('../components/AcademicHistory', () => ({
 }));
 
 const api = await import('../api/teacherApi');
+const groupApi = await import('../api/groupApi');
 
 const QS = { courseUnit: { id: 10, code: 'QS', name: 'Qualidade de Software' }, studentCount: 2 };
 const ES = { courseUnit: { id: 11, code: 'ES', name: 'Engenharia de Software' }, studentCount: 0 };
@@ -77,14 +86,21 @@ describe('TeacherApp', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('Esta UC não te está atribuída.');
   });
 
-  it('has a groups section with a clear empty state and a logout button', async () => {
+  it('has a groups section with the contexts of the unit and a logout button (#106)', async () => {
     api.getMyCourseUnits.mockResolvedValue([QS]);
     api.getCourseUnitStudents.mockResolvedValue([ANA]);
+    const list = vi.fn().mockResolvedValue([]);
+    groupApi.teacherGroupApi.mockReturnValue({ list });
     const onLogout = vi.fn();
     render(<TeacherApp name="Prof. Rita" onLogout={onLogout} />);
 
     fireEvent.click(await screen.findByRole('tab', { name: 'Grupos' }));
-    expect(screen.getByText(/ficam disponíveis quando a formação de grupos/)).toBeInTheDocument();
+
+    expect(await screen.findByText('Ainda não há contextos.')).toBeInTheDocument();
+    expect(groupApi.teacherGroupApi).toHaveBeenCalledWith(10);
+    expect(list).toHaveBeenCalled();
+    // Só os alunos inscritos na UC podem entrar no contexto (R4).
+    expect(within(screen.getByRole('form', { name: 'Novo contexto' })).getByLabelText(/Ana Costa/)).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Sair' }));
     expect(onLogout).toHaveBeenCalled();

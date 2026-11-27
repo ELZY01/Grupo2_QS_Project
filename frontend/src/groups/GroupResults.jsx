@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { AREAS } from '../mascot/mascot.js';
+import GroupStats from './GroupStats.jsx';
 import { formatDecimal, formatGap, swapError } from './groupPlan.js';
 
 /**
@@ -66,6 +67,8 @@ function SwapPanel({ groups, onSwap }) {
  * Grupos de uma geração e porque é que os alunos ficaram juntos.
  * RN26: só mostra nomes, a média do grupo e o membro mais forte por área.
  * Nunca mostra notas nem níveis individuais.
+ * Na área do docente (#106) cada grupo traz também as estatísticas do grupo (R6). A RN26 protege
+ * os alunos uns dos outros; o docente já vê o perfil de cada aluno das suas UCs (R3).
  */
 export default function GroupResults({ generation, onSwap }) {
   const { groups = [], maxAverageGap } = generation;
@@ -91,7 +94,8 @@ export default function GroupResults({ generation, onSwap }) {
         (G1, G2, …, G2, G1). Depois houve trocas para cada grupo ter alguém forte em cada área.
       </p>
 
-      <div className="group-grid">
+      {/* Com as estatísticas (área do docente) os cartões precisam de mais largura para a tabela. */}
+      <div className={`group-grid ${groups.some((g) => g.areas) ? 'group-grid-stats' : ''}`}>
         {groups.map((group, i) => (
           <article
             key={group.number}
@@ -118,18 +122,25 @@ export default function GroupResults({ generation, onSwap }) {
               ))}
             </ul>
 
-            <h4>Mais forte por área</h4>
-            <ul className="group-strongest">
-              {Object.entries(AREAS).map(([code, area]) => {
-                const strongest = group.strongestByArea?.find((s) => s.area === code);
-                return (
-                  <li key={code} className={`group-area group-area-${area.key}`}>
-                    <span className="group-area-label">{area.label}</span>
-                    <span>{strongest?.studentName ?? 'sem dados'}</span>
-                  </li>
-                );
-              })}
-            </ul>
+            {/* O endpoint do admin (#69) não traz o mais forte por área; nesse caso a secção não aparece. */}
+            {group.strongestByArea && (
+              <>
+                <h4>Mais forte por área</h4>
+                <ul className="group-strongest">
+                  {Object.entries(AREAS).map(([code, area]) => {
+                    const strongest = group.strongestByArea.find((s) => s.area === code);
+                    return (
+                      <li key={code} className={`group-area group-area-${area.key}`}>
+                        <span className="group-area-label">{area.label}</span>
+                        <span>{strongest?.studentName ?? 'sem dados'}</span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </>
+            )}
+
+            {group.areas && <GroupStats group={group} />}
           </article>
         ))}
       </div>
